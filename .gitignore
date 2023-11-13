@@ -1,0 +1,14 @@
+node_modules
+*DS_Store
+.idea
+.vscode
+dist
+
+# Non zero install strategy
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

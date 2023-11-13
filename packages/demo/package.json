@@ -1,0 +1,19 @@
+{
+  "name": "demo",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --color --ext .ts src/",
+    "lint:fix": "yarn run lint --fix",
+    "test:unit": "echo",
+    "test:integrations": "echo"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.37.0",
+    "@types/node": "18.15.11",
+    "eslint": "^8.37.0",
+    "typescript": "^5.0.3"
+  }
+}

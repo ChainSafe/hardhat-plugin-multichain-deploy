@@ -1,0 +1,24 @@
+name: 'ci / test'
+on:
+  push:
+    branches:
+      - main # runs on push to master, add more branches if you use them
+  pull_request:
+    branches:
+      - '**' # runs on update to pull request on any branch
+jobs:
+  # most basic test job
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn' # cache node modules
+          node-version: 18
+      - run: corepack enable
+      - run: yarn install # install dependencies
+      - run: yarn run lint # lint code
+      - run: yarn run build # compile typescript into javascript
+      - run: yarn run test:unit # run unit tests
+      - run: yarn run test:integrations # run integration tests
