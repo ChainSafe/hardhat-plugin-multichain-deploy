@@ -16,6 +16,18 @@ jobs:
         with:
           node-version: 18
       - run: corepack enable
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Yarn cache
+        id: yarn-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: yarn-cache
+
       - run: yarn install # install dependencies
       - run: yarn run lint # lint code
       - run: yarn run build # compile typescript into javascript

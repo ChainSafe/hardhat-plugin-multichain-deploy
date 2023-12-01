@@ -1,4 +1,4 @@
-# Hardhat TypeScript plugin boilerplate
+# Chainsafe's Hardhat Plugin for Multichain deployment with Sygma
 
 This is a sample Hardhat plugin written in TypeScript. Creating a Hardhat plugin
 can be as easy as extracting a part of your config into a different file and

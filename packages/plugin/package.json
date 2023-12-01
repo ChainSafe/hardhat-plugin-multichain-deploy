@@ -1,10 +1,10 @@
 {
-  "name": "hardhat-ts-plugin-boilerplate",
+  "name": "@chainsafe/hardhat-plugin-multichain-deploy",
   "version": "0.0.1",
   "description": "TODO",
   "repository": "github:ChainSafe/hardhat-plugin-multichain-deploy",
   "author": "ChainSafe Systems",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [
