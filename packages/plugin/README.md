@@ -1,54 +1,33 @@
 # Chainsafe's Hardhat Plugin for Multichain deployment with Sygma
 
-This is a sample Hardhat plugin written in TypeScript. Creating a Hardhat plugin
-can be as easy as extracting a part of your config into a different file and
-publishing it to npm.
+Experience the seamless integration of Hardhat with Sygma: the ultimate plugin for effortlessly deploying your Ethereum smart contracts across multiple chains.  
+Embrace the power of Sygma protocol, and transform your deployment process into a streamlined, efficient, and multi-chain adventure.  
+With this tool, you're not just deploying contracts; you're unlocking new horizons in the blockchain ecosystem.
 
-This sample project contains an example on how to do that, but also comes with
-many more features:
-
-- A mocha test suite ready to use
-- TravisCI already setup
-- A package.json with scripts and publishing info
-- Examples on how to do different things
 
 ## Installation
 
-To start working on your project, just run
-
 ```bash
-yarn install
+npm install --save-dev @nomicfoundation/hardhat-ignition
 ```
 
-## Plugin development
+Import the plugin in your `hardhat.config.js``:
 
-Make sure to read our [Plugin Development Guide](https://hardhat.org/advanced/building-plugins.html) to learn how to build a plugin.
+```js
+require("@nomicfoundation/hardhat-ignition");
+```
 
-## Testing
+Or if you are using TypeScript, in your `hardhat.config.ts``:
 
-Running `yarn test` will run every test located in the `test/` folder. They
-use [mocha](https://mochajs.org) and [chai](https://www.chaijs.com/),
-but you can customize them.
+```js
+import "@nomicfoundation/hardhat-ignition";
+```
 
-We recommend creating unit tests for your own modules, and integration tests for
-the interaction of the plugin with Hardhat and its dependencies.
 
-## Linting and autoformat
+## Usages
 
-All of Hardhat projects use [prettier](https://prettier.io/) and
-[tslint](https://palantir.github.io/tslint/).
+# TODO
 
-You can check if your code style is correct by running `npm run lint`, and fix
-it with `npm run lint:fix`.
+## Contribution
 
-## Building the project
-
-Just run `yarn build` ️👷
-
-## README file
-
-This README describes this boilerplate project, but won't be very useful to your
-plugin users.
-
-Take a look at `README-TEMPLATE.md` for an example of what a Hardhat plugin's
-README should look like.
+Refer to [root readme](../../README.md) file
