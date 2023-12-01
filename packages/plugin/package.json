@@ -36,7 +36,7 @@
     "chai": "^4.2.0",
     "eslint": "^8",
     "hardhat": "^2.0.0",
-    "mocha": "^7.1.2",
+    "mocha": "^10",
     "ts-node": "^10",
     "typescript": "^5"
   },
