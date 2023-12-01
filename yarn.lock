@@ -36,6 +36,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@chainsafe/hardhat-plugin-multichain-deploy@workspace:packages/plugin":
+  version: 0.0.0-use.local
+  resolution: "@chainsafe/hardhat-plugin-multichain-deploy@workspace:packages/plugin"
+  dependencies:
+    "@types/chai": ^4.1.7
+    "@types/eslint": ^8
+    "@types/fs-extra": ^5.0.4
+    "@types/mocha": ^5.2.6
+    "@types/node": ^18
+    chai: ^4.2.0
+    eslint: ^8
+    hardhat: ^2.0.0
+    mocha: ^10
+    ts-node: ^10
+    typescript: ^5
+  peerDependencies:
+    hardhat: ^2.0.0
+  languageName: unknown
+  linkType: soft
+
 "@chainsafe/persistent-merkle-tree@npm:^0.4.2":
   version: 0.4.2
   resolution: "@chainsafe/persistent-merkle-tree@npm:0.4.2"
@@ -3213,26 +3233,6 @@ __metadata:
   checksum: e951259d8cd2e0d196c72ec711add7115d42eb9a8146c8eeda5b8d3ac91e5dd816b9cd68920726d9fd4490368e7ed86e9c423f40db87e2d8dfafa00fa17c3a31
   languageName: node
   linkType: hard
-
-"hardhat-ts-plugin-boilerplate@workspace:packages/plugin":
-  version: 0.0.0-use.local
-  resolution: "hardhat-ts-plugin-boilerplate@workspace:packages/plugin"
-  dependencies:
-    "@types/chai": ^4.1.7
-    "@types/eslint": ^8
-    "@types/fs-extra": ^5.0.4
-    "@types/mocha": ^5.2.6
-    "@types/node": ^18
-    chai: ^4.2.0
-    eslint: ^8
-    hardhat: ^2.0.0
-    mocha: ^10
-    ts-node: ^10
-    typescript: ^5
-  peerDependencies:
-    hardhat: ^2.0.0
-  languageName: unknown
-  linkType: soft
 
 "hardhat@npm:^2.0.0":
   version: 2.19.1
