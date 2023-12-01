@@ -4,15 +4,18 @@
   "author": "ChainSafe <info@chainsafe.io>",
   "license": "(MIT)",
   "packageManager": "yarn@3.2.1",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "build": "yarn workspaces foreach -vpt run build",
     "lint": "yarn workspaces foreach -vpt run lint",
+    "test": "yarn workspaces foreach -vpt run test",
     "test:unit": "yarn workspaces foreach -vpt run test:unit",
     "test:integrations": "yarn workspaces foreach -vpt run test:integrations"
   },
