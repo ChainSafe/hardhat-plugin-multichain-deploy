@@ -1,0 +1,46 @@
+{
+  "name": "hardhat-ts-plugin-boilerplate",
+  "version": "0.0.1",
+  "description": "TODO",
+  "repository": "github:ChainSafe/hardhat-plugin-multichain-deploy",
+  "author": "ChainSafe",
+  "license": "MIT",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "keywords": [
+    "ethereum",
+    "smart-contracts",
+    "hardhat",
+    "hardhat-plugin"
+  ],
+  "scripts": {
+    "lint": "eslint --color --ext .ts src/",
+    "lint:fix": "yarn run lint --fix",
+    "test": "mocha --exit --recursive 'test/**/*.test.ts'",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepublishOnly": "yarn build"
+  },
+  "files": [
+    "dist/src/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/eslint": "^8",
+    "@types/fs-extra": "^5.0.4",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^18",
+    "chai": "^4.2.0",
+    "eslint": "^8",
+    "hardhat": "^2.0.0",
+    "mocha": "^7.1.2",
+    "ts-node": "^10",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "hardhat": "^2.0.0"
+  }
+}
