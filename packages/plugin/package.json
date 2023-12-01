@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "description": "TODO",
   "repository": "github:ChainSafe/hardhat-plugin-multichain-deploy",
-  "author": "ChainSafe",
+  "author": "ChainSafe Systems",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [
     "ethereum",
-    "smart-contracts",
+    "sygma",
     "hardhat",
     "hardhat-plugin"
   ],
