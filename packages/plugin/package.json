@@ -28,6 +28,7 @@
     "README.md"
   ],
   "devDependencies": {
+    "@buildwithsygma/sygma-sdk-core": "^2.4.0",
     "@types/chai": "^4.1.7",
     "@types/eslint": "^8",
     "@types/fs-extra": "^5.0.4",
@@ -41,6 +42,7 @@
     "typescript": "^5"
   },
   "peerDependencies": {
+    "@buildwithsygma/sygma-sdk-core": ">= 2.4.0 < 3",
     "hardhat": "^2.0.0"
   }
 }
