@@ -24,10 +24,11 @@ extendConfig(
       multichainConfig.deploymentNetworks = [];
     }
 
-    /** Validating if config contains network config that are needed for deploymentNetworks */
+    /** Validates that all networks in 'deploymentNetworks' are defined in 'config.networks'. */
     const missedNetworks: string[] = [];
-    Object.keys(config.networks).forEach((networkName) => {
-      if (!multichainConfig.deploymentNetworks?.includes(networkName))
+    const configNetworkKeys = Object.keys(config.networks);
+    multichainConfig.deploymentNetworks.forEach((networkName) => {
+      if (!configNetworkKeys.includes(networkName))
         missedNetworks.push(networkName);
     });
     if (missedNetworks.length)
@@ -48,6 +49,6 @@ extendEnvironment((hre) => {
   // We use lazyObject to avoid initializing things until they are actually
   // needed.
   hre.multichain = lazyObject(
-    () => new MultichainHardhatRuntimeEnvironmentField()
+    () => new MultichainHardhatRuntimeEnvironmentField(hre)
   );
 });

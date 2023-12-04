@@ -7,7 +7,7 @@ const config: HardhatUserConfig = {
   solidity: "0.7.3",
   defaultNetwork: "hardhat",
   multichain: {
-    deploymentNetworks: [],
+    deploymentNetworks: ["hardhat"],
   },
 };
 
