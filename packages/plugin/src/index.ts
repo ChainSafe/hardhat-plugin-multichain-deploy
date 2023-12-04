@@ -1,43 +1,45 @@
-import path from "path";
 import { extendConfig, extendEnvironment } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
-import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
+import {
+  HardhatConfig,
+  HardhatUserConfig,
+  MultichainConfig,
+} from "hardhat/types";
 
-import { ExampleHardhatRuntimeEnvironmentField } from "./ExampleHardhatRuntimeEnvironmentField";
-// This import is needed to let the TypeScript compiler know that it should include your type
-// extensions in your npm package's types file.
+import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
+
 import "./type-extensions";
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
-    // We apply our default config here. Any other kind of config resolution
-    // or normalization should be placed here.
-    //
-    // `config` is the resolved config, which will be used during runtime and
-    // you should modify.
-    // `userConfig` is the config as provided by the user. You should not modify
-    // it.
-    //
-    // If you extended the `HardhatConfig` type, you need to make sure that
-    // executing this function ensures that the `config` object is in a valid
-    // state for its type, including its extensions. For example, you may
-    // need to apply a default value, like in this example.
-    const userPath = userConfig.paths?.newPath;
+    const multichainConfig = userConfig.multichain || {};
 
-    let newPath: string;
-    if (userPath === undefined) {
-      newPath = path.join(config.paths.root, "newPath");
-    } else {
-      if (path.isAbsolute(userPath)) {
-        newPath = userPath;
-      } else {
-        // We resolve relative paths starting from the project's root.
-        // Please keep this convention to avoid confusion.
-        newPath = path.normalize(path.join(config.paths.root, userPath));
-      }
+    if (
+      !multichainConfig.deploymentNetworks ||
+      !multichainConfig.deploymentNetworks.length
+    ) {
+      console.warn(
+        "Warning: Missing Deployment Networks - It appears that you have not provided the Deployment Networks. To avoid potential issues, it is recommended that you supply these values. If they are not provided, you will be required to enter them manually as parameters. Please ensure that the necessary information is included to facilitate a smoother process."
+      );
+      multichainConfig.deploymentNetworks = [];
     }
 
-    config.paths.newPath = newPath;
+    /** Validating if config contains network config that are needed for deploymentNetworks */
+    const missedNetworks: string[] = [];
+    Object.keys(config.networks).forEach((networkName) => {
+      if (!multichainConfig.deploymentNetworks?.includes(networkName))
+        missedNetworks.push(networkName);
+    });
+    if (missedNetworks.length)
+      throw new Error(
+        `Missing Configuration for Deployment Networks: ${missedNetworks
+          .join(", ")
+          .replace(/, ([^,]*)$/, " and $1")}\n` +
+          `The above networks are listed in your 'deploymentNetworks' but they are not defined in 'config.networks'. ` +
+          `Please ensure each of these networks is properly configured in the 'config.networks' section of your configuration.`
+      );
+
+    config.multichain = multichainConfig as MultichainConfig;
   }
 );
 
@@ -45,5 +47,7 @@ extendEnvironment((hre) => {
   // We add a field to the Hardhat Runtime Environment here.
   // We use lazyObject to avoid initializing things until they are actually
   // needed.
-  hre.example = lazyObject(() => new ExampleHardhatRuntimeEnvironmentField());
+  hre.multichain = lazyObject(
+    () => new MultichainHardhatRuntimeEnvironmentField()
+  );
 });
