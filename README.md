@@ -5,7 +5,7 @@
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)
 3. [Getting Started](#getting-started)
-4. [Building and Running the Snap](#building-and-running-the-snap)
+4. [Building](#building)
 5. [Testing](#testing)
 6. [Linting and Formatting](#linting-and-formatting)
 
@@ -53,21 +53,15 @@ corepack enable
 yarn install
 ```
 
-<a name="building-and-running-the-snap"></a>
-## Building and Running the Snap
+<a name="building"></a>
+## Building 
 
 To build and run the project, follow these steps:
 
-1. Build all packages:
+Build all packages:
 
 ```shell
 yarn build
-```
-
-2. Run the MetaMask Snap:
-
-```shell
-yarn start
 ```
 
 <a name="testing"></a>
