@@ -60,7 +60,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
     await this.initializationPromise;
   }
 
-  public deployMultichain(): string {
-    return "Deployed";
+  public async deployMultichain(
+    nameOrBytecode: string,
+    args: string[],
+    options: Object,
+  ): Promise<string> {
+    if (!this.isReady) throw new Error("TODO: Not ready yet!");
+    await Promise.resolve();
+
+    const bytcode = await this.hre.artifacts.readArtifact(nameOrBytecode).then(artifact => artifact.bytecode).catch(() => nameOrBytecode);
+    console.log(args, options, bytcode);
+
+    return "0x00";
   }
 }
