@@ -1,6 +1,7 @@
 import "hardhat/types/config";
 import "hardhat/types/runtime";
 
+import { Environment } from "@buildwithsygma/sygma-sdk-core";
 import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
 
 declare module "hardhat/types/config" {
@@ -9,6 +10,7 @@ declare module "hardhat/types/config" {
    */
 
   export interface MultichainConfig {
+    environment: Environment;
     deploymentNetworks: string[];
   }
 

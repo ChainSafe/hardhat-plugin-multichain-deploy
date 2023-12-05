@@ -1,10 +1,11 @@
 import { extendConfig, extendEnvironment } from "hardhat/config";
-import { lazyObject } from "hardhat/plugins";
+import { HardhatPluginError, lazyObject } from "hardhat/plugins";
 import {
   HardhatConfig,
   HardhatUserConfig,
   MultichainConfig,
 } from "hardhat/types";
+import { Environment } from "@buildwithsygma/sygma-sdk-core";
 
 import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
 
@@ -12,7 +13,15 @@ import "./type-extensions";
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
-    const multichainConfig = userConfig.multichain || {};
+    const multichainConfig = Object.assign({}, userConfig.multichain);
+
+    if (!multichainConfig.environment) {
+      console.warn(
+        "Warning: Missing 'environment' setting. Defaulting to ",
+        Environment.TESTNET
+      );
+      multichainConfig.environment = Environment.TESTNET;
+    }
 
     if (
       !multichainConfig.deploymentNetworks ||
@@ -32,7 +41,8 @@ extendConfig(
         missedNetworks.push(networkName);
     });
     if (missedNetworks.length)
-      throw new Error(
+      throw new HardhatPluginError(
+        "@chainsafe/hardhat-plugin-multichain-deploy",
         `Missing Configuration for Deployment Networks: ${missedNetworks
           .join(", ")
           .replace(/, ([^,]*)$/, " and $1")}\n` +
