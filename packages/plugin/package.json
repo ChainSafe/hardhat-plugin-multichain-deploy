@@ -44,5 +44,8 @@
   "peerDependencies": {
     "@buildwithsygma/sygma-sdk-core": ">= 2.4.0 < 3",
     "hardhat": "^2.0.0"
+  },
+  "dependencies": {
+    "web3": "^4.3.0"
   }
 }
