@@ -11,12 +11,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
   public isReady: boolean = false;
 
   public constructor(private readonly hre: HardhatRuntimeEnvironment) {
-    this.initializationPromise = new Promise<void>((resolve) => {
-      void this.initSygma(resolve);
+    this.initializationPromise = new Promise<void>((resolve, reject) => {
+      void this.initSygma(resolve, reject);
+    }).catch((error) => {
+      console.error(error);
     });
   }
 
-  private async initSygma(resolve: () => void): Promise<void> {
+  private async initSygma(
+    resolve: () => void,
+    reject: (error: Error) => void
+  ): Promise<void> {
     const originChainId = await getNetworkChainId(
       this.hre.network.name,
       this.hre
@@ -41,13 +46,15 @@ export class MultichainHardhatRuntimeEnvironmentField {
         missedRoutes.push({ chainId, name });
     });
     if (missedRoutes.length)
-      throw new HardhatPluginError(
-        "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unavailable Networks in Deployment: The following networks from 'deploymentNetworks' are not routed in Sygma for the '${environment}' environment: ${missedRoutes
-          .map(({ chainId, name }) => `${name}(${chainId})`)
-          .join(", ")
-          .replace(/, ([^,]*)$/, " and $1")}\n` +
-          `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
+      reject(
+        new HardhatPluginError(
+          "@chainsafe/hardhat-plugin-multichain-deploy",
+          `Unavailable Networks in Deployment: The following networks from 'deploymentNetworks' are not routed in Sygma for the '${environment}' environment: ${missedRoutes
+            .map(({ chainId, name }) => `${name}(${chainId})`)
+            .join(", ")
+            .replace(/, ([^,]*)$/, " and $1")}\n` +
+            `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
+        )
       );
 
     this.isReady = true;
@@ -63,12 +70,16 @@ export class MultichainHardhatRuntimeEnvironmentField {
   public async deployMultichain(
     nameOrBytecode: string,
     args: string[],
-    options: Object,
+    options?: Object
   ): Promise<string> {
     if (!this.isReady) throw new Error("TODO: Not ready yet!");
-    await Promise.resolve();
 
-    const bytcode = await this.hre.artifacts.readArtifact(nameOrBytecode).then(artifact => artifact.bytecode).catch(() => nameOrBytecode);
+    const bytcode = await this.hre.artifacts
+      .readArtifact(nameOrBytecode)
+      .then((artifact) => artifact.bytecode)
+      .catch(() => nameOrBytecode);
+
+    // temp to silence eslint
     console.log(args, options, bytcode);
 
     return "0x00";

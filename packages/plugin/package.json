@@ -30,11 +30,13 @@
   "devDependencies": {
     "@buildwithsygma/sygma-sdk-core": "^2.4.0",
     "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7",
     "@types/eslint": "^8",
     "@types/fs-extra": "^5.0.4",
     "@types/mocha": "^5.2.6",
     "@types/node": "^18",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^8",
     "hardhat": "^2.0.0",
     "mocha": "^10",

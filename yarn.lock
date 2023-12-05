@@ -193,11 +193,13 @@ __metadata:
   dependencies:
     "@buildwithsygma/sygma-sdk-core": ^2.4.0
     "@types/chai": ^4.1.7
+    "@types/chai-as-promised": ^7
     "@types/eslint": ^8
     "@types/fs-extra": ^5.0.4
     "@types/mocha": ^5.2.6
     "@types/node": ^18
     chai: ^4.2.0
+    chai-as-promised: ^7.1.1
     eslint: ^8
     hardhat: ^2.0.0
     mocha: ^10
@@ -2634,7 +2636,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:^4.1.7":
+"@types/chai-as-promised@npm:^7":
+  version: 7.1.8
+  resolution: "@types/chai-as-promised@npm:7.1.8"
+  dependencies:
+    "@types/chai": "*"
+  checksum: c0a19cffe8d3f406b2cb9ba17f5f0efe318b14f27896d807b3199cc2231c16a4b5b6c464fdf2a939214de481de58cffd46c240539d3d4ece18659277d71ccc23
+  languageName: node
+  linkType: hard
+
+"@types/chai@npm:*, @types/chai@npm:^4.1.7":
   version: 4.3.11
   resolution: "@types/chai@npm:4.3.11"
   checksum: 0c216ac4a19bfbf8318bb104d32e50704ee2ffc4b538b976c4326e6638fee121462402caa570662227a2a218810388aadb14bdbd3d3d474ec300b00695db448a
@@ -3844,6 +3855,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chai-as-promised@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "chai-as-promised@npm:7.1.1"
+  dependencies:
+    check-error: ^1.0.2
+  peerDependencies:
+    chai: ">= 2.1.2 < 5"
+  checksum: e25a602c3a8cd0b97ce6b0c7ddaaf4bd8517941da9f44dc65262c5268ea463f634dc495cdef6a21eaeffdb5022b6f4c3781027b8308273b7fff089c605abf6aa
+  languageName: node
+  linkType: hard
+
 "chai@npm:^4.2.0":
   version: 4.3.10
   resolution: "chai@npm:4.3.10"
@@ -3880,7 +3902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"check-error@npm:^1.0.3":
+"check-error@npm:^1.0.2, check-error@npm:^1.0.3":
   version: 1.0.3
   resolution: "check-error@npm:1.0.3"
   dependencies:
