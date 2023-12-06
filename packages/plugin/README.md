@@ -25,35 +25,34 @@ import "@chainsafe/hardhat-plugin-multichain-deploy";
 
 ## Environment extensions
 
-Package introduce not `multichain` name space to the `hre`
+The package introduces a `multichain` namespace to the Hardhat Runtime Environment (HRE).
 
-This will introduce few new methods:
- * `async waitInitialization()`
-   * takes no arguments and return promise you can wait to resolve to ensure you can use sygma.
- * `async deployMultichain(nameOrBytecode: string, arguments: string[], options?: Object): Promise<TxHash>`
-   * `name` or `bytcode` of smart contract you want to deploy
-   * `arguments` that will be provided to smart contract deployment
-   * `options` TODO bro!
+New methods introduced:
+ * `async waitInitialization(): Promise<void>`: Returns a promise. Wait for this promise to resolve to ensure readiness for using Sygma.
+ * `async deployMultichain(nameOrBytecode: string, arguments: string[], options?: Object): Promise<TxHash>`: Deploys a smart contract.
+   * `nameOrBytecode`: Name or bytecode of the smart contract.
+   * `arguments`: Arguments for the smart contract deployment.
+   * `options`: Additional deployment options (details TBD).
 
 ## Configuration
 
-Hardhat Plugin Multichain deployment plugin introduce few options that are required for successfully deploying contract on multiple chains.
+The Hardhat Plugin Multichain Deployment plugin requires specific configurations for successful multi-chain deployment.
 
 This plugin extends introduce new name space called `multichain` with options:
- * `environment`: represents Sygma environment used for deployment
-   * import `Environment` from `@buildwithsygma/sygma-sdk-core` to use it as safe constants
-   * possible options: `mainnet`, `testnet`, `devnet` and `local`
- * `deploymentNetworks`: list of network that will be used for deployment
-   * listed network names need to match networks listed inside `networks`
-   * list of networks need to be part of sygma routes. For list of routes please reference to [Sygma documentation](https://docs.buildwithsygma.com/environments).
+ * `environment`: Specifies the Sygma environment for deployment.
+   * Import `Environment` from `@buildwithsygma/sygma-sdk-core` for constant values.
+   * Options: `mainnet`, `testnet`, `devnet`, `local`.
+ * `deploymentNetworks`: List of networks for deployment.
+   * Ensure network names match those in `networks`.
+   * Networks must correspond with Sygma routes. Refer to [Sygma documentation](https://docs.buildwithsygma.com/environments) for routes.
 
-This is an example of how to set it:
+Example configuration:
 
 ```typescript
-import {Environment} from "@buildwithsygma/sygma-sdk-core";
+import { Environment } from "@buildwithsygma/sygma-sdk-core";
 
 const config: HardhatUserConfig = {
-    solidity: "0.7.3",
+    // ... other configurations ...
     defaultNetwork: "goerli",
     networks: {
         sepolia: { ... },
@@ -69,23 +68,21 @@ const config: HardhatUserConfig = {
 
 ## Usages
 
-#### TODO
+### TODO
 
-As now, you are familiar with all capabilities ^^ lets see how everything works together.  
-Here is scenario, made contract erc20 contract and want to deploy it on multiple chains. You made config similar from configuration part.
+After familiarizing yourself with the capabilities, let's see how everything works together.  
 
-your code will be looks something like this
-
+Example scenario: You've created an ERC20 contract and want to deploy it across multiple chains using the configuration mentioned above.
 ```typescript
-// wait to deployer finish initialization
+// Wait for deployment initialization
 await hre.multichain.waitInitialization();
 
-// deploy a contract
+// Deploy the contract
 const tx = await hre.multichain.deployMultichain('MySuperToken', [name, symbol, decimals], { singer: web3signer });
 
-console.log("My TX: ", tx);
+console.log("Transaction Hash: ", tx);
 ```
 
 ## Contribution
 
-Refer to [root readme](../../README.md) file
+For contributing to the project, please refer to the [root readme](../../README.md) file.
