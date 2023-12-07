@@ -1,13 +1,12 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Config } from "@buildwithsygma/sygma-sdk-core";
 import { HardhatPluginError } from "hardhat/plugins";
+import { ContractConstructorArgs, ContractAbi } from "web3";
 import {
   getConfigEnvironmentVariable,
   getDeploymentNetworks,
   getNetworkChainId,
 } from "./utils";
-import {ContractConstructorArgs} from "web3";
-import {ContractAbi} from "web3-types/src/eth_abi_types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isValidated: boolean = false;
@@ -40,13 +39,13 @@ export class MultichainHardhatRuntimeEnvironmentField {
     });
     if (missedRoutes.length)
       throw new HardhatPluginError(
-          "@chainsafe/hardhat-plugin-multichain-deploy",
-          `Unavailable Networks in Deployment: The following networks from 'deploymentNetworks' are not routed in Sygma for the '${environment}' environment: ${missedRoutes
-            .map(({ chainId, name }) => `${name}(${chainId})`)
-            .join(", ")
-            .replace(/, ([^,]*)$/, " and $1")}\n` +
-            `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
-        );
+        "@chainsafe/hardhat-plugin-multichain-deploy",
+        `Unavailable Networks in Deployment: The following networks from 'deploymentNetworks' are not routed in Sygma for the '${environment}' environment: ${missedRoutes
+          .map(({ chainId, name }) => `${name}(${chainId})`)
+          .join(", ")
+          .replace(/, ([^,]*)$/, " and $1")}\n` +
+          `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
+      );
 
     this.isValidated = true;
   }
