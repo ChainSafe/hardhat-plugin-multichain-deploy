@@ -50,7 +50,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.isValidated = true;
   }
 
-  public async deployMultichain<Abi extends ContractAbi>(
+  public async deployMultichain<Abi extends ContractAbi = any>(
     nameOrBytecode: string,
     args: ContractConstructorArgs<Abi>,
     options?: Object

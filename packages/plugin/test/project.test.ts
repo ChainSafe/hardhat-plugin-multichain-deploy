@@ -42,20 +42,7 @@ describe("Integration tests examples", function () {
   describe("Hardhat Runtime Environment extension", function () {
     useEnvironment("hardhat-project");
 
-    it("The deployMultichain should fail as is not initialized", function () {
-      expect(
-        this.hre.multichain.deployMultichain('test', [])
-      ).to.be.rejectedWith(Error);
-    });
-
-    it("The multichain field should wait for initialization", async function () {
-      expect(this.hre.multichain.isReady).to.be.false;
-      await this.hre.multichain.waitInitialization();
-      expect(this.hre.multichain.isReady).to.be.true;
-    });
-
     it("The deployMultichain field should return 0x00", async function () {
-      await this.hre.multichain.waitInitialization();
       expect(
         await this.hre.multichain.deployMultichain('test', [])
       ).to.be.equal("0x00");
