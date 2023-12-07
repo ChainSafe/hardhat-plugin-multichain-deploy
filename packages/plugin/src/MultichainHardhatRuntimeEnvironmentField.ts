@@ -6,6 +6,8 @@ import {
   getDeploymentNetworks,
   getNetworkChainId,
 } from "./utils";
+import {ContractConstructorArgs} from "web3";
+import {ContractAbi} from "web3-types/src/eth_abi_types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isValidated: boolean = false;
@@ -49,9 +51,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.isValidated = true;
   }
 
-  public async deployMultichain(
+  public async deployMultichain<Abi extends ContractAbi>(
     nameOrBytecode: string,
-    args: string[],
+    args: ContractConstructorArgs<Abi>,
     options?: Object
   ): Promise<string> {
     if (!this.isValidated) await this.validateConfig();
