@@ -1,5 +1,5 @@
 {
-  "name": "root",
+  "name": "hardhat-plugin-multichain-deploy",
   "private": true,
   "author": "ChainSafe <info@chainsafe.io>",
   "license": "(MIT)",
@@ -12,6 +12,8 @@
   },
   "scripts": {
     "build": "yarn workspaces foreach -vpt run build",
+    "hardhat": "hardhat",
+    "compile": "hardhat compile",
     "lint": "yarn workspaces foreach -vpt run lint",
     "test:unit": "yarn workspaces foreach -vpt run test:unit",
     "test:integrations": "yarn workspaces foreach -vpt run test:integrations"
@@ -19,9 +21,13 @@
   "devDependencies": {
     "@chainsafe/eslint-config": "^1.1.0",
     "@rushstack/eslint-patch": "^1.2.0",
+    "@types/chai": "^4",
     "@types/eslint": "^8.37.0",
     "@types/node": "18.15.11",
+    "chai": "^4.2.0",
     "eslint": "8.37.0",
+    "ethers": "^6.4.0",
+    "typechain": "^8.3.0",
     "typescript": "^5.0.3"
   }
 }
