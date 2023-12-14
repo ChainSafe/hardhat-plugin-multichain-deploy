@@ -69,6 +69,7 @@ contract CrosschainDeployAdapter {
         @param gasLimit Contract deploy and init gas.
         @param salt Entropy for contract address generation.
         @param isUniquePerChain True to have unique addresses on every chain.
+        @param constructorArgs Bytes to add to the initCode, or empty, one per chain.
         @param initDatas Bytes to send to the contract after deployment, or empty, one per chain.
         @param destinationDomainIDs Sygma Domain IDs of target chains.
         @param fees Native currency amount to pay for Sygma services, one per chain. Empty for current domain.
@@ -78,20 +79,27 @@ contract CrosschainDeployAdapter {
         uint gasLimit,
         bytes32 salt,
         bool isUniquePerChain,
+        bytes[] memory constructorArgs,
         bytes[] memory initDatas,
         uint8[] memory destinationDomainIDs,
         uint[] memory fees
     ) external payable {
-        uint len = initDatas.length;
-        if (len != destinationDomainIDs.length ||
+        uint len = constructorArgs.length;
+        if (len != initDatas.length ||
+            len != destinationDomainIDs.length ||
             len != fees.length) revert InvalidLength();
         bytes32 fortifiedSalt = fortify(msg.sender, salt, isUniquePerChain);
         for (uint i = 0; i < len; ++i) {
             if (destinationDomainIDs[i] == DOMAIN_ID) {
-                deploy(initCode, initDatas[i], fortifiedSalt);
+                deploy(abi.encodePacked(initCode, constructorArgs[i]), initDatas[i], fortifiedSalt);
                 continue;
             }
-            bytes memory depositData = prepareDepositData(gasLimit, initCode, initDatas[i], fortifiedSalt);
+            bytes memory depositData = prepareDepositData(
+                gasLimit,
+                abi.encodePacked(initCode, constructorArgs[i]),
+                initDatas[i],
+                fortifiedSalt
+            );
             if (fees[i] > address(this).balance) revert InsufficientFee();
             BRIDGE.deposit{value: fees[i]}(
                 destinationDomainIDs[i],
@@ -110,6 +118,7 @@ contract CrosschainDeployAdapter {
         @param gasLimit Contract deploy and init gas.
         @param salt Entropy for contract address generation.
         @param isUniquePerChain True to have unique addresses on every chain.
+        @param constructorArgs Bytes to add to the initCode, or empty, one per chain.
         @param initDatas Bytes to send to the contract after deployment, or empty, one per chain.
         @param destinationDomainIDs Sygma Domain IDs of target chains.
      */
@@ -118,11 +127,13 @@ contract CrosschainDeployAdapter {
         uint gasLimit,
         bytes32 salt,
         bool isUniquePerChain,
+        bytes[] memory constructorArgs,
         bytes[] memory initDatas,
         uint8[] memory destinationDomainIDs
     ) external view returns (uint[] memory fees) {
-        uint len = initDatas.length;
-        if (len != destinationDomainIDs.length) revert InvalidLength();
+        uint len = constructorArgs.length;
+        if (len != initDatas.length ||
+            len != destinationDomainIDs.length) revert InvalidLength();
         bytes32 fortifiedSalt = fortify(msg.sender, salt, isUniquePerChain);
         IFeeHandler feeHandler = BRIDGE._feeHandler();
         fees = new uint[](len);
@@ -130,7 +141,12 @@ contract CrosschainDeployAdapter {
             if (destinationDomainIDs[i] == DOMAIN_ID) {
                 continue;
             }
-            bytes memory depositData = prepareDepositData(gasLimit, initCode, initDatas[i], fortifiedSalt);
+            bytes memory depositData = prepareDepositData(
+                gasLimit,
+                abi.encodePacked(initCode, constructorArgs[i]),
+                initDatas[i],
+                fortifiedSalt
+            );
             (fees[i], ) = feeHandler.calculateFee(
                 address(this),
                 DOMAIN_ID,
@@ -224,7 +240,7 @@ contract CrosschainDeployAdapter {
      */
     function prepareDepositData(
         uint gasLimit,
-        bytes calldata initCode,
+        bytes memory initCode,
         bytes memory initData,
         bytes32 fortifiedSalt
     ) public view returns (bytes memory) {

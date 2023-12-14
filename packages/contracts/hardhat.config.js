@@ -28,10 +28,24 @@ const deploy = async (contractName, signer, ...params) => {
   return instance;
 };
 
-const getDeployBytecode = async (contractName, ...params) => {
+const getBytecodeAndConstructorArgs = async (contractName, ...params) => {
   const factory = await ethers.getContractFactory(contractName);
   const tx = await factory.getDeployTransaction(...params);
+  return {
+    bytecode: factory.bytecode,
+    args: ethers.dataSlice(tx.data, ethers.dataLength(factory.bytecode)),
+    data: tx.data,
+  };
+};
+
+const getDeployBytecode = async (contractName, ...params) => {
+  const tx = await getBytecodeAndConstructorArgs(contractName, ...params);
   return tx.data;
+};
+
+const getPureBytecode = async (contractName) => {
+  const factory = await ethers.getContractFactory(contractName);
+  return factory.bytecode;
 };
 
 const deployWithCreate3 = async (contractName, signer, createX, salt, ...params) => {
@@ -118,12 +132,16 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
   assert(ethers.isAddress(adapterAddress), "Invalid adapter address in the ENV.");
   const adapter = await ethers.getContractAt("CrosschainDeployAdapter", adapterAddress);
 
+  const predictedAddress = await adapter.computeContractAddress(deployer.address, salt, isUnique);
+  assert(await ethers.provider.getCode(predictedAddress) == "0x", "Salt already used with this deployer");
+
   const IContract = await ethers.getContractAt(contractname, ZERO_ADDRESS);
   const initFuncs = initfunctions.split(",");
   if (initFuncs.length > 0) {
     assert(initFuncs.length == dest.length, "Invalid number of init functions.");
   }
   const initArgs = initarguments.split(",");
+  assert(initArgs.length % dest.length == 0, "Invalid init arguments number");
   const argsPerFunc = initArgs.length / dest.length;
   const initData = [];
   for (let i = 0; i < initFuncs.length; i++) {
@@ -133,25 +151,37 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
     initData.push(initTx.data);
   }
   const constructorArgs = constructorarguments.split(",");
-  const bytecode = await getDeployBytecode(
+  assert(constructorArgs.length % dest.length == 0, "Invalid constructor arguments number");
+  const argsPerConstructor = constructorArgs.length / dest.length;
+  const constructorData = [];
+  for (let i = 0; i < initFuncs.length; i++) {
+    const constructorTx = await getBytecodeAndConstructorArgs(
+      contractname,
+      ...(constructorArgs.slice(i * argsPerConstructor, (i + 1) * argsPerConstructor))
+    );
+    constructorData.push(constructorTx.args);
+  }
+  const bytecode = await getPureBytecode(
     contractname,
-    ...constructorArgs,
   );
   const fees = await adapter.calculateDeployFee(
     bytecode,
     gaslimit,
     salt,
     isUnique,
+    constructorData,
     initData,
     dest,
   );
   const totalFee = fees.reduce((total, next) => total + next, 0n);
+
   console.log("Crosschain deploy fee:", ethers.formatEther(totalFee));
   const tx = await adapter.deploy(
     bytecode,
     gaslimit,
     salt,
     isUnique,
+    constructorData,
     initData,
     dest,
     fees.map(el => el),

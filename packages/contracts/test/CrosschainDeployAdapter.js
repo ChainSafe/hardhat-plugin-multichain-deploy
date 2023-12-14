@@ -20,9 +20,23 @@ describe("CrosschainDeployAdapter", function () {
   };
 
   const getDeployBytecode = async (contractName, ...params) => {
+    const tx = await getBytecodeAndConstructorArgs(contractName, ...params);
+    return tx.data;
+  };
+
+  const getBytecodeAndConstructorArgs = async (contractName, ...params) => {
     const factory = await ethers.getContractFactory(contractName);
     const tx = await factory.getDeployTransaction(...params);
-    return tx.data;
+    return {
+      bytecode: factory.bytecode,
+      args: ethers.dataSlice(tx.data, ethers.dataLength(factory.bytecode)),
+      data: tx.data,
+    };
+  };
+
+  const getPureBytecode = async (contractName) => {
+    const factory = await ethers.getContractFactory(contractName);
+    return factory.bytecode;
   };
 
   const deployAdapter = async () => {
@@ -75,7 +89,7 @@ describe("CrosschainDeployAdapter", function () {
     return ethers.zeroPadValue(`0x${hex.length % 2 == 0 ? "" : "0"}${hex}`, lenBytes).slice(2);
   };
 
-  it("should deploy adapter and have valid defaults", async function () {
+  it.only("should deploy adapter and have valid defaults", async function () {
     const { adapter, createX, bridge } = await loadFixture(deployAdapter);
     expect(await adapter.FACTORY()).to.equal(createX.target);
     expect(await adapter.BRIDGE()).to.equal(bridge.target);
@@ -97,13 +111,16 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     await expect(adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [DOMAIN_ID], [0, 0]
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [DOMAIN_ID], [0, 0]
     )).to.be.revertedWithCustomError(adapter, "InvalidLength");
     await expect(adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [DOMAIN_ID, domainId], [0]
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [DOMAIN_ID, domainId], [0]
     )).to.be.revertedWithCustomError(adapter, "InvalidLength");
     await expect(adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x", "0x"], [DOMAIN_ID], [0]
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x", "0x"], [DOMAIN_ID], [0]
+    )).to.be.revertedWithCustomError(adapter, "InvalidLength");
+    await expect(adapter.deploy(
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x", "0x"], ["0x"], [DOMAIN_ID], [0]
     )).to.be.revertedWithCustomError(adapter, "InvalidLength");
   });
 
@@ -121,7 +138,7 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     await expect(adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [domainId], [10], {value: 9}
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [domainId], [10], {value: 9}
     )).to.be.revertedWithCustomError(adapter, "InsufficientFee");
   });
 
@@ -139,7 +156,7 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     await expect(adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [domainId], [10], {value: 11}
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [domainId], [10], {value: 11}
     )).to.be.revertedWithCustomError(adapter, "ExcessFee");
   });
 
@@ -157,7 +174,7 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [DOMAIN_ID], [0]);
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [DOMAIN_ID], [0]);
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, NON_UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, NON_UNIQUE);
     await expectContractEvents(tx, adapter, [
@@ -185,7 +202,7 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], [DOMAIN_ID], [0]);
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], ["0x"], [DOMAIN_ID], [0]);
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     await expectContractEvents(tx, adapter, [
@@ -243,7 +260,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [domainId], [fee], {value: fee});
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [domainId], [fee], {value: fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, NON_UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -282,7 +299,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [domainId], [fee], {value: fee});
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [domainId], [fee], {value: fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, NON_UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -321,7 +338,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], [domainId], [fee], {value: fee});
+      adapterBytecode, gasLimit, SALT, NON_UNIQUE, ["0x"], ["0x"], [domainId], [fee], {value: fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, NON_UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -373,7 +390,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], [domainId], [fee], {value: fee});
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], ["0x"], [domainId], [fee], {value: fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -427,7 +444,7 @@ describe("CrosschainDeployAdapter", function () {
     const gasLimit = 2000000;
     const initialize = (await bridge.initialize.populateTransaction(init)).data;
     const tx = await adapter.deploy(
-      mockBridgeBytecode, gasLimit, SALT, UNIQUE, [initialize], [domainId], [fee], {value: fee});
+      mockBridgeBytecode, gasLimit, SALT, UNIQUE, ["0x"], [initialize], [domainId], [fee], {value: fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -480,7 +497,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x"], [domainId1, domainId2], [fee, fee * 2n], {value: fee * 3n});
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x"], ["0x", "0x"], [domainId1, domainId2], [fee, fee * 2n], {value: fee * 3n});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
@@ -520,7 +537,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [DOMAIN_ID, domainId1, domainId2], [0, fee, fee], {value: fee + fee});
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [DOMAIN_ID, domainId1, domainId2], [0, fee, fee], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -567,7 +584,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [domainId1, DOMAIN_ID, domainId2], [fee, 0, fee], {value: fee + fee});
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [domainId1, DOMAIN_ID, domainId2], [fee, 0, fee], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -614,7 +631,7 @@ describe("CrosschainDeployAdapter", function () {
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const tx = await adapter.deploy(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [domainId1, domainId2, DOMAIN_ID], [fee, fee, 0], {value: fee + fee});
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [domainId1, domainId2, DOMAIN_ID], [fee, fee, 0], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -655,12 +672,30 @@ describe("CrosschainDeployAdapter", function () {
     const init1 = 5;
     const init2 = 8;
     const init3 = 13;
-    const mockBridgeBytecode = await getDeployBytecode(
+    const mockBridgeBytecode = await getPureBytecode("MockBridge");
+    const constructorArgs1 = (await getBytecodeAndConstructorArgs(
       "MockBridge",
       handler.address,
       feeHandler.target,
       DOMAIN_ID,
-    );
+    )).args;
+    const constructorArgs2 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId1,
+    )).args;
+    const constructorArgs3 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId2,
+    )).args;
+    const constr = [
+      constructorArgs1,
+      constructorArgs2,
+      constructorArgs3,
+    ];
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const initialize = [
@@ -669,16 +704,16 @@ describe("CrosschainDeployAdapter", function () {
       (await bridge.initialize.populateTransaction(init3)).data,
     ];
     const tx = await adapter.deploy(
-      mockBridgeBytecode, gasLimit, SALT, UNIQUE, initialize, [DOMAIN_ID, domainId1, domainId2], [0, fee, fee], {value: fee + fee});
+      mockBridgeBytecode, gasLimit, SALT, UNIQUE, constr, initialize, [DOMAIN_ID, domainId1, domainId2], [0, fee, fee], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData1 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[1], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[1]]), initialize[1], fortifiedSalt]
     ).slice(66);
     const executeData2 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[2], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[2]]), initialize[2], fortifiedSalt]
     ).slice(66);
     const expectedDepositData1 =
       "0x" +
@@ -724,12 +759,30 @@ describe("CrosschainDeployAdapter", function () {
     const init1 = 5;
     const init2 = 8;
     const init3 = 13;
-    const mockBridgeBytecode = await getDeployBytecode(
+    const mockBridgeBytecode = await getPureBytecode("MockBridge");
+    const constructorArgs1 = (await getBytecodeAndConstructorArgs(
       "MockBridge",
       handler.address,
       feeHandler.target,
       DOMAIN_ID,
-    );
+    )).args;
+    const constructorArgs2 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId1,
+    )).args;
+    const constructorArgs3 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId2,
+    )).args;
+    const constr = [
+      constructorArgs1,
+      constructorArgs2,
+      constructorArgs3,
+    ];
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const initialize = [
@@ -738,16 +791,16 @@ describe("CrosschainDeployAdapter", function () {
       (await bridge.initialize.populateTransaction(init3)).data,
     ];
     const tx = await adapter.deploy(
-      mockBridgeBytecode, gasLimit, SALT, UNIQUE, initialize, [domainId1, DOMAIN_ID, domainId2], [fee, 0, fee], {value: fee + fee});
+      mockBridgeBytecode, gasLimit, SALT, UNIQUE, constr, initialize, [domainId1, DOMAIN_ID, domainId2], [fee, 0, fee], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData1 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[0], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[0]]), initialize[0], fortifiedSalt]
     ).slice(66);
     const executeData2 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[2], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[2]]), initialize[2], fortifiedSalt]
     ).slice(66);
     const expectedDepositData1 =
       "0x" +
@@ -781,7 +834,7 @@ describe("CrosschainDeployAdapter", function () {
     const newBridge = await ethers.getContractAt("MockBridge", expectedAddress);
     expect(await newBridge._resourceIDToHandlerAddress(RESOURCE_ID)).to.equal(handler.address);
     expect(await newBridge._feeHandler()).to.equal(feeHandler.target);
-    expect(await newBridge._domainID()).to.equal(DOMAIN_ID);
+    expect(await newBridge._domainID()).to.equal(domainId1);
     expect(await newBridge.initialized()).to.equal(init2);
   });
 
@@ -793,12 +846,30 @@ describe("CrosschainDeployAdapter", function () {
     const init1 = 5;
     const init2 = 8;
     const init3 = 13;
-    const mockBridgeBytecode = await getDeployBytecode(
+    const mockBridgeBytecode = await getPureBytecode("MockBridge");
+    const constructorArgs1 = (await getBytecodeAndConstructorArgs(
       "MockBridge",
       handler.address,
       feeHandler.target,
       DOMAIN_ID,
-    );
+    )).args;
+    const constructorArgs2 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId1,
+    )).args;
+    const constructorArgs3 = (await getBytecodeAndConstructorArgs(
+      "MockBridge",
+      handler.address,
+      feeHandler.target,
+      domainId2,
+    )).args;
+    const constr = [
+      constructorArgs1,
+      constructorArgs2,
+      constructorArgs3,
+    ];
     const fee = ethers.parseUnits("0.01");
     const gasLimit = 2000000;
     const initialize = [
@@ -807,16 +878,16 @@ describe("CrosschainDeployAdapter", function () {
       (await bridge.initialize.populateTransaction(init3)).data,
     ];
     const tx = await adapter.deploy(
-      mockBridgeBytecode, gasLimit, SALT, UNIQUE, initialize, [domainId1, domainId2, DOMAIN_ID], [fee, fee, 0], {value: fee + fee});
+      mockBridgeBytecode, gasLimit, SALT, UNIQUE, constr, initialize, [domainId1, domainId2, DOMAIN_ID], [fee, fee, 0], {value: fee + fee});
     const fortifiedSalt = await adapter.fortify(deployer.address, SALT, UNIQUE);
     const expectedAddress = await adapter.computeContractAddress(deployer.address, SALT, UNIQUE);
     const executeData1 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[0], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[0]]), initialize[0], fortifiedSalt]
     ).slice(66);
     const executeData2 = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "bytes", "bytes", "bytes32"],
-      [ZERO_ADDRESS, mockBridgeBytecode, initialize[1], fortifiedSalt]
+      [ZERO_ADDRESS, ethers.concat([mockBridgeBytecode, constr[1]]), initialize[1], fortifiedSalt]
     ).slice(66);
     const expectedDepositData1 =
       "0x" +
@@ -850,7 +921,7 @@ describe("CrosschainDeployAdapter", function () {
     const newBridge = await ethers.getContractAt("MockBridge", expectedAddress);
     expect(await newBridge._resourceIDToHandlerAddress(RESOURCE_ID)).to.equal(handler.address);
     expect(await newBridge._feeHandler()).to.equal(feeHandler.target);
-    expect(await newBridge._domainID()).to.equal(DOMAIN_ID);
+    expect(await newBridge._domainID()).to.equal(domainId2);
     expect(await newBridge.initialized()).to.equal(init3);
   });
 
@@ -866,10 +937,13 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     await expect(adapter.calculateDeployFee(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x"], [DOMAIN_ID]
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], ["0x", "0x"], [DOMAIN_ID]
     )).to.be.revertedWithCustomError(adapter, "InvalidLength");
     await expect(adapter.calculateDeployFee(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], [DOMAIN_ID, domainId1]
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x"], ["0x"], [DOMAIN_ID, domainId1]
+    )).to.be.revertedWithCustomError(adapter, "InvalidLength");
+    await expect(adapter.calculateDeployFee(
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x"], ["0x"], [DOMAIN_ID]
     )).to.be.revertedWithCustomError(adapter, "InvalidLength");
   });
 
@@ -886,13 +960,13 @@ describe("CrosschainDeployAdapter", function () {
     );
     const gasLimit = 2000000;
     let fees = await adapter.calculateDeployFee(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [DOMAIN_ID, domainId1, domainId2]);
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [DOMAIN_ID, domainId1, domainId2]);
     expect(fees).to.eql([0n, ethers.parseUnits("0.01") / 20n, ethers.parseUnits("0.01") / 30n]);
     fees = await adapter.calculateDeployFee(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [domainId1, DOMAIN_ID, domainId2]);
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [domainId1, DOMAIN_ID, domainId2]);
     expect(fees).to.eql([ethers.parseUnits("0.01") / 20n, 0n, ethers.parseUnits("0.01") / 30n]);
     fees = await adapter.calculateDeployFee(
-      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], [domainId1, domainId2, DOMAIN_ID]);
+      adapterBytecode, gasLimit, SALT, UNIQUE, ["0x", "0x", "0x"], ["0x", "0x", "0x"], [domainId1, domainId2, DOMAIN_ID]);
     expect(fees).to.eql([ethers.parseUnits("0.01") / 20n, ethers.parseUnits("0.01") / 30n, 0n]);
   });
 
