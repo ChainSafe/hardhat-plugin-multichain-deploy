@@ -4,6 +4,12 @@ CrosschainDeployAdapter contract is meant to be used in conjunction with CreateX
 
 Expected user flow is to call `Adapter.calculateDeployFee()` to get a list of fee amounts needed for each target domain deployment. Then user should send transaction `Adapter.deploy(..., fees, {value: feesSum})` that will in turn call PermissionlessGenericHandler of Sygma, that will trigger deployments of the specified bytecode across desired domain ids (chains).
 
+### Example usage
+
+	yarn run hardhat --network sepolia crosschain-deploy --contractname HelloSygma --destinationdomains 2,7 --constructorarguments 4 --initfunctions setName,setName --initarguments sepolia,mumbai --gaslimit 500000 --salt 0x0000000000000000000000000000000000000000000000000000000000000004
+
+This will deploy the example HelloSygma contract to Sepolia and Mumbai testnets onto the same address, using different initalization calls.
+
 ### Chainsafe Documentation
 
 Each function has detailed natspec comments for those that know how to read Solidity.
