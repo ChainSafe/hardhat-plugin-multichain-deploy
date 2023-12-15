@@ -4759,23 +4759,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat-plugin-multichain-deploy@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "hardhat-plugin-multichain-deploy@workspace:."
-  dependencies:
-    "@chainsafe/eslint-config": ^1.1.0
-    "@rushstack/eslint-patch": ^1.2.0
-    "@types/chai": ^4
-    "@types/eslint": ^8.37.0
-    "@types/node": 18.15.11
-    chai: ^4.2.0
-    eslint: 8.37.0
-    ethers: ^6.4.0
-    typechain: ^8.3.0
-    typescript: ^5.0.3
-  languageName: unknown
-  linkType: soft
-
 "hardhat@npm:^2.0.0, hardhat@npm:^2.19.1":
   version: 2.19.2
   resolution: "hardhat@npm:2.19.2"
@@ -7132,6 +7115,23 @@ __metadata:
   checksum: 166c449f4bc794d47f8e337bf0ffbcfdb26c33109030aac4b6e5a33a91fa85783f2290addeb7b3c89d6d9b90c8276e719494d193129bed0a60a2d4a6fd658277
   languageName: node
   linkType: hard
+
+"root@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "root@workspace:."
+  dependencies:
+    "@chainsafe/eslint-config": ^1.1.0
+    "@rushstack/eslint-patch": ^1.2.0
+    "@types/chai": ^4
+    "@types/eslint": ^8.37.0
+    "@types/node": 18.15.11
+    chai: ^4.2.0
+    eslint: 8.37.0
+    ethers: ^6.4.0
+    typechain: ^8.3.0
+    typescript: ^5.0.3
+  languageName: unknown
+  linkType: soft
 
 "run-parallel-limit@npm:^1.1.0":
   version: 1.1.0

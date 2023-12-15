@@ -89,7 +89,7 @@ describe("CrosschainDeployAdapter", function () {
     return ethers.zeroPadValue(`0x${hex.length % 2 == 0 ? "" : "0"}${hex}`, lenBytes).slice(2);
   };
 
-  it.only("should deploy adapter and have valid defaults", async function () {
+  it("should deploy adapter and have valid defaults", async function () {
     const { adapter, createX, bridge } = await loadFixture(deployAdapter);
     expect(await adapter.FACTORY()).to.equal(createX.target);
     expect(await adapter.BRIDGE()).to.equal(bridge.target);

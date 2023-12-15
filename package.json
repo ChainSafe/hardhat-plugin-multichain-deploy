@@ -1,5 +1,5 @@
 {
-  "name": "hardhat-plugin-multichain-deploy",
+  "name": "root",
   "private": true,
   "author": "ChainSafe <info@chainsafe.io>",
   "license": "(MIT)",

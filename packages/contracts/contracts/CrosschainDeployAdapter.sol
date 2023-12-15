@@ -65,17 +65,17 @@ contract CrosschainDeployAdapter {
     /**
         @notice Deposits to the Bridge contract using the PermissionlessGenericHandler,
         @notice to request contract deployments on other chains.
-        @param initCode Contract deploy bytecode.
+        @param deployBytecode Contract deploy bytecode.
         @param gasLimit Contract deploy and init gas.
         @param salt Entropy for contract address generation.
         @param isUniquePerChain True to have unique addresses on every chain.
-        @param constructorArgs Bytes to add to the initCode, or empty, one per chain.
+        @param constructorArgs Bytes to add to the deployBytecode, or empty, one per chain.
         @param initDatas Bytes to send to the contract after deployment, or empty, one per chain.
         @param destinationDomainIDs Sygma Domain IDs of target chains.
         @param fees Native currency amount to pay for Sygma services, one per chain. Empty for current domain.
      */
     function deploy(
-        bytes calldata initCode,
+        bytes calldata deployBytecode,
         uint gasLimit,
         bytes32 salt,
         bool isUniquePerChain,
@@ -91,12 +91,12 @@ contract CrosschainDeployAdapter {
         bytes32 fortifiedSalt = fortify(msg.sender, salt, isUniquePerChain);
         for (uint i = 0; i < len; ++i) {
             if (destinationDomainIDs[i] == DOMAIN_ID) {
-                deploy(abi.encodePacked(initCode, constructorArgs[i]), initDatas[i], fortifiedSalt);
+                deploy(abi.encodePacked(deployBytecode, constructorArgs[i]), initDatas[i], fortifiedSalt);
                 continue;
             }
             bytes memory depositData = prepareDepositData(
                 gasLimit,
-                abi.encodePacked(initCode, constructorArgs[i]),
+                abi.encodePacked(deployBytecode, constructorArgs[i]),
                 initDatas[i],
                 fortifiedSalt
             );
@@ -114,16 +114,16 @@ contract CrosschainDeployAdapter {
 
     /**
         @notice Returns total amount of native currency needed for a deploy request.
-        @param initCode Contract deploy bytecode.
+        @param deployBytecode Contract deploy bytecode.
         @param gasLimit Contract deploy and init gas.
         @param salt Entropy for contract address generation.
         @param isUniquePerChain True to have unique addresses on every chain.
-        @param constructorArgs Bytes to add to the initCode, or empty, one per chain.
+        @param constructorArgs Bytes to add to the deployBytecode, or empty, one per chain.
         @param initDatas Bytes to send to the contract after deployment, or empty, one per chain.
         @param destinationDomainIDs Sygma Domain IDs of target chains.
      */
     function calculateDeployFee(
-        bytes calldata initCode,
+        bytes calldata deployBytecode,
         uint gasLimit,
         bytes32 salt,
         bool isUniquePerChain,
@@ -143,7 +143,7 @@ contract CrosschainDeployAdapter {
             }
             bytes memory depositData = prepareDepositData(
                 gasLimit,
-                abi.encodePacked(initCode, constructorArgs[i]),
+                abi.encodePacked(deployBytecode, constructorArgs[i]),
                 initDatas[i],
                 fortifiedSalt
             );
@@ -163,21 +163,21 @@ contract CrosschainDeployAdapter {
         @notice Executes the deploy.
         @notice Only callable by handler.
         @param originDepositor The depositor from the origin chain. Must be this contract address.
-        @param initCode Contract deploy bytecode.
+        @param deployBytecode Contract deploy bytecode.
         @param initData Bytes to send to the contract after deployment, or empty.
         @param fortifiedSalt Entropy for contract address generation.
      */
-    function execute(address originDepositor, bytes calldata initCode, bytes calldata initData, bytes32 fortifiedSalt) external onlyHandler {
+    function execute(address originDepositor, bytes calldata deployBytecode, bytes calldata initData, bytes32 fortifiedSalt) external onlyHandler {
         if (originDepositor != address(this)) revert InvalidOrigin();
-        deploy(initCode, initData, fortifiedSalt);
+        deploy(deployBytecode, initData, fortifiedSalt);
     }
 
-    function deploy(bytes memory initCode, bytes memory initData, bytes32 fortifiedSalt) internal {
+    function deploy(bytes memory deployBytecode, bytes memory initData, bytes32 fortifiedSalt) internal {
         address newContract;
         if (initData.length == 0) {
-            newContract = FACTORY.deployCreate3(fortifiedSalt, initCode);
+            newContract = FACTORY.deployCreate3(fortifiedSalt, deployBytecode);
         } else {
-            newContract = FACTORY.deployCreate3AndInit(fortifiedSalt, initCode, initData, ICreateX.Values(0, 0));
+            newContract = FACTORY.deployCreate3AndInit(fortifiedSalt, deployBytecode, initData, ICreateX.Values(0, 0));
         }
         emit Deployed(fortifiedSalt, newContract);
     }
@@ -240,11 +240,11 @@ contract CrosschainDeployAdapter {
      */
     function prepareDepositData(
         uint gasLimit,
-        bytes memory initCode,
+        bytes memory deployBytecode,
         bytes memory initData,
         bytes32 fortifiedSalt
     ) public view returns (bytes memory) {
-        bytes memory encoded = abi.encode(address(0), initCode, initData, fortifiedSalt);
+        bytes memory encoded = abi.encode(address(0), deployBytecode, initData, fortifiedSalt);
         return abi.encodePacked(
             gasLimit,               // uint256 maxFee
             uint16(4),              // uint16 len(executeFuncSignature)
