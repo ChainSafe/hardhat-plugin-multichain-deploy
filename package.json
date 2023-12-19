@@ -14,8 +14,6 @@
   },
   "scripts": {
     "build": "yarn workspaces foreach -vpt run build",
-    "hardhat": "hardhat",
-    "compile": "hardhat compile",
     "lint": "yarn workspaces foreach -vpt run lint",
     "test": "yarn workspaces foreach -vpt run test",
     "test:unit": "yarn workspaces foreach -vpt run test:unit",
