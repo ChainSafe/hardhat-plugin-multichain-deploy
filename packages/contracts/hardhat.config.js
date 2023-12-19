@@ -1,7 +1,8 @@
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-web3-v4");
 require("@chainsafe/hardhat-ts-artifact-plugin");
 require("hardhat-docgen");
 require("dotenv").config();
+const { hexToBytes, bytesToHex, fromWei, isHexStrict, isAddress } = require("web3").utils;
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -20,22 +21,21 @@ const assert = (condition, message) => {
   throw new Error(message);
 }
 
-const deploy = async (contractName, signer, ...params) => {
-  const factory = await ethers.getContractFactory(contractName);
-  const instance = await factory.connect(signer).deploy(...params);
-  await instance.waitForDeployment();
-  console.log(`Deploy ${contractName}: ${instance.target}`);
-  return instance;
+const getContractAt = (contractName, address, from) => {
+  const artifact = artifacts.readArtifactSync(contractName);
+  const contract = new web3.eth.Contract(artifact.abi, address, { from });
+  return contract;
 };
 
-const getBytecodeAndConstructorArgs = async (contractName, ...params) => {
-  const factory = await ethers.getContractFactory(contractName);
-  const tx = await factory.getDeployTransaction(...params);
-  return {
-    bytecode: factory.bytecode,
-    args: ethers.dataSlice(tx.data, ethers.dataLength(factory.bytecode)),
-    data: tx.data,
-  };
+const deploy = async (contractName, signer, txParams, ...params) => {
+  const artifact = artifacts.readArtifactSync(contractName);
+  const contract = new web3.eth.Contract(artifact.abi);
+  const response = await contract.deploy({
+    data: artifact.bytecode,
+    arguments: params,
+  }).send({ from: signer, ...txParams });
+  response.options.from = signer;
+  return response;
 };
 
 const getDeployBytecode = async (contractName, ...params) => {
@@ -43,50 +43,59 @@ const getDeployBytecode = async (contractName, ...params) => {
   return tx.data;
 };
 
-const getPureBytecode = async (contractName) => {
-  const factory = await ethers.getContractFactory(contractName);
-  return factory.bytecode;
+const getBytecodeAndConstructorArgs = async (contractName, ...params) => {
+  const artifact = artifacts.readArtifactSync(contractName);
+  const contract = new web3.eth.Contract(artifact.abi);
+  const data = await contract.deploy({
+    data: artifact.bytecode,
+    arguments: params,
+  }).encodeABI();
+  return {
+    bytecode: artifact.bytecode,
+    args: bytesToHex(hexToBytes(data).slice(hexToBytes(artifact.bytecode).length)),
+    data,
+  };
 };
 
-const deployWithCreate3 = async (contractName, signer, createX, salt, ...params) => {
+const getPureBytecode = async (contractName) => {
+  const artifact = artifacts.readArtifactSync(contractName);
+  return artifact.bytecode;
+};
+
+const deployWithCreate3 = async (contractName, signer, createX, salt, txParams, ...params) => {
   const bytecode = await getDeployBytecode(contractName, ...params);
-  const deployerSalt = ethers.concat([signer.address, "0x00", salt]);
-  const receipt = await (await createX["deployCreate3(bytes32,bytes)"](deployerSalt, bytecode)).wait();
-  const instance = await ethers.getContractAt(contractName, receipt.logs[1].args[0]);
-  console.log(`Create3 ${contractName}: ${instance.target}`);
+  const deployerSalt = encodePacked(["bytes", "bytes", "bytes"], [signer, "0x00", salt]);
+  const receipt = await createX.methods["deployCreate3(bytes32,bytes)"](deployerSalt, bytecode).send({from: signer, ...txParams});
+  const instance = getContractAt(contractName, receipt.events.ContractCreation.returnValues.newContract, signer);
+  console.log(`Create3 ${contractName}: ${instance.options.address}`);
   return instance;
 };
 
-const getContractEvents = async (tx, contract) => {
-  const receipt = await (await tx).wait();
-  const events = receipt.logs.filter(event => event.address == contract.target)
-    .map(event => contract.interface.parseLog(event));
-  return events.map(event => ({
-    name: event.name,
-    args: event.args,
-  }));
+const encodePacked = (types, values) => {
+  const input = types.map((el, index) => ({type: el, value: values[index]}));
+  return web3.utils.encodePacked(...input);
 };
 
 task("deploy", "Deploys CrosschainDeployAdapter on selected network")
 .addOptionalParam("verify", "Verify the deployed adapter", "false", types.bool)
 .setAction(async ({ verify }) => {
-  const [deployer] = await ethers.getSigners();
+  const [deployer] = await web3.eth.getAccounts();
   const createX = process.env.CREATEX;
   const salt = isSet(process.env.SALT) ? process.env.SALT : "0x0000000000000000000000";
   const resourceId = process.env.RESOURCE_ID;
 
   const bridge = process.env[`${network.name.toUpperCase()}_BRIDGE`];
 
-  assert(ethers.isHexString(salt, 11), "Invalid salt, must be 0x prefixed hex 11 bytes.");
-  assert(ethers.isHexString(resourceId, 32), "Invalid resource ID, must be 0x prefixed hex 32 bytes.");
-  assert(ethers.isAddress(bridge), "Invalid bridge address.");
+  assert(isHexStrict(salt) && hexToBytes(salt).length == 11, "Invalid salt, must be 0x prefixed hex 11 bytes.");
+  assert(isHexStrict(resourceId) && hexToBytes(resourceId).length == 32, "Invalid resource ID, must be 0x prefixed hex 32 bytes.");
+  assert(isAddress(bridge), "Invalid bridge address.");
 
   const gasMultiplier = network.name.includes("arbi") ? 10 : 1;
   let factory;
-  if (ethers.isAddress(createX)) {
-    factory = await ethers.getContractAt("ICreateX", createX);
+  if (isAddress(createX)) {
+    factory = getContractAt("ICreateX", createX, deployer);
   } else {
-    assert((await deployer.getNonce()) == 0, "Deployer has to have 0 nonce to deploy CreateX");
+    assert((await web3.eth.getTransactionCount(deployer)) == 0, "Deployer has to have 0 nonce to deploy CreateX");
     factory = await deploy("CreateX", deployer, { gasLimit: 2700000 * gasMultiplier });
   }
 
@@ -95,18 +104,18 @@ task("deploy", "Deploys CrosschainDeployAdapter on selected network")
     deployer,
     factory,
     salt,
-    factory.target,
+    { gasLimit: 1900000 * gasMultiplier },
+    factory.options.address,
     bridge,
     resourceId,
-    { gasLimit: 1800000 * gasMultiplier }
   );
 
   if (verify === "true") {
     console.log("Waiting half a minute to start verification");
     await sleep(30000);
     await hre.run("verify:verify", {
-      address: adapter.target,
-      constructorArguments: [factory.target, bridge, resourceId],
+      address: adapter.options.address,
+      constructorArguments: [factory.options.address, bridge, resourceId],
     });
   }
 });
@@ -121,21 +130,22 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
 .addOptionalParam("salt", "Crosschain deployment salt hex 32 bytes", "0x0000000000000000000000000000000000000000000000000000000000000000")
 .addOptionalParam("unique", "Should the address be unique on every chain (true), or the same (false)", "false", types.bool)
 .addOptionalParam("verify", "Verify the deployed contract on current network", "false", types.bool)
-.setAction(async ({ contractname, destinationdomains, constructorarguments, initfunctions, initarguments, gaslimit, salt, unique, verify }) => {
-  const [deployer] = await ethers.getSigners();
+.setAction(async ({ contractname, destinationdomains, constructorarguments,
+  initfunctions, initarguments, gaslimit, salt, unique, verify }) => {
+  const [deployer] = await web3.eth.getAccounts();
   const dest = destinationdomains.split(",");
   assert(dest.length > 0, "Empty destination domains list");
   const isUnique = unique == "true";
-  assert(ethers.isHexString(salt, 32), "Invalid salt, must be 0x prefixed hex 32 bytes.");
+  assert(isHexStrict(salt) && hexToBytes(salt).length == 32, "Invalid salt, must be 0x prefixed hex 32 bytes.");
 
   const adapterAddress = process.env.ADAPTER;
-  assert(ethers.isAddress(adapterAddress), "Invalid adapter address in the ENV.");
-  const adapter = await ethers.getContractAt("CrosschainDeployAdapter", adapterAddress);
+  assert(isAddress(adapterAddress), "Invalid adapter address in the ENV.");
+  const adapter = getContractAt("CrosschainDeployAdapter", adapterAddress, deployer);
 
-  const predictedAddress = await adapter.computeContractAddress(deployer.address, salt, isUnique);
-  assert(await ethers.provider.getCode(predictedAddress) == "0x", "Salt already used with this deployer");
+  const predictedAddress = await adapter.methods.computeContractAddress(deployer, salt, isUnique).call();
+  assert(await web3.eth.getCode(predictedAddress) == "0x", "Salt already used with this deployer");
 
-  const IContract = await ethers.getContractAt(contractname, ZERO_ADDRESS);
+  const IContract = getContractAt(contractname, ZERO_ADDRESS, deployer);
   const initFuncs = initfunctions.split(",");
   if (initFuncs.length > 0) {
     assert(initFuncs.length == dest.length, "Invalid number of init functions.");
@@ -145,10 +155,10 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
   const argsPerFunc = initArgs.length / dest.length;
   const initData = [];
   for (let i = 0; i < initFuncs.length; i++) {
-    const initTx = await IContract[initFuncs[i]].populateTransaction(
+    const initTx = await IContract.methods[initFuncs[i]](
       ...(initArgs.slice(i * argsPerFunc, (i + 1) * argsPerFunc))
-    );
-    initData.push(initTx.data);
+    ).encodeABI();
+    initData.push(initTx);
   }
   const constructorArgs = constructorarguments.split(",");
   assert(constructorArgs.length % dest.length == 0, "Invalid constructor arguments number");
@@ -164,7 +174,7 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
   const bytecode = await getPureBytecode(
     contractname,
   );
-  const fees = await adapter.calculateDeployFee(
+  const fees = await adapter.methods.calculateDeployFee(
     bytecode,
     gaslimit,
     salt,
@@ -172,11 +182,11 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
     constructorData,
     initData,
     dest,
-  );
+  ).call();
   const totalFee = fees.reduce((total, next) => total + next, 0n);
 
-  console.log("Crosschain deploy fee:", ethers.formatEther(totalFee));
-  const tx = await adapter.deploy(
+  console.log("Crosschain deploy fee:", fromWei(totalFee, "ether"));
+  const tx = await adapter.methods.deploy(
     bytecode,
     gaslimit,
     salt,
@@ -185,19 +195,17 @@ task("crosschain-deploy", "Deploys a contract across different chains using the 
     initData,
     dest,
     fees.map(el => el),
-    {value: totalFee},
-  );
+  ).send({value: totalFee});
 
-  const events = await getContractEvents(tx, adapter);
-  const deployed = events.filter(event => event.name == "Deployed");
-  if (deployed.length > 0) {
-    console.log(`${contractname} deployed on ${isUnique ? "current" : "every"} network to:`, deployed[0].args[1]);
+  const deployed = tx.events.Deployed;
+  if (deployed) {
+    console.log(`${contractname} deployed on ${isUnique ? "current" : "every"} network to:`, deployed.returnValues.newContract);
 
     if (verify === "true") {
       console.log("Waiting half a minute to start verification");
       await sleep(30000);
       await hre.run("verify:verify", {
-        address: deployed[0].args[1],
+        address: deployed.returnValues.newContract,
         constructorArguments: constructorArgs,
       });
     }
