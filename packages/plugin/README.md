@@ -74,9 +74,6 @@ After familiarizing yourself with the capabilities, let's see how everything wor
 
 Example scenario: You've created an ERC20 contract and want to deploy it across multiple chains using the configuration mentioned above.
 ```typescript
-// Wait for deployment initialization
-await hre.multichain.waitInitialization();
-
 // Deploy the contract
 const tx = await hre.multichain.deployMultichain('MySuperToken', [name, symbol, decimals], { singer: web3signer });
 
