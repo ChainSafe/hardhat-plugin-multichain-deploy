@@ -28,12 +28,15 @@
     "README.md"
   ],
   "devDependencies": {
+    "@buildwithsygma/sygma-sdk-core": "^2.4.0",
     "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7",
     "@types/eslint": "^8",
     "@types/fs-extra": "^5.0.4",
     "@types/mocha": "^5.2.6",
     "@types/node": "^18",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^8",
     "hardhat": "^2.0.0",
     "mocha": "^10",
@@ -41,6 +44,10 @@
     "typescript": "^5"
   },
   "peerDependencies": {
+    "@buildwithsygma/sygma-sdk-core": ">= 2.4.0 < 3",
     "hardhat": "^2.0.0"
+  },
+  "dependencies": {
+    "web3": "^4.3.0"
   }
 }
