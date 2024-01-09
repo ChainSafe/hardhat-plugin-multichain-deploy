@@ -7,6 +7,10 @@ on:
       - edited
       - synchronize
 
+concurrency:
+  group: semantic-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   main:
     name: Validate PR title
@@ -21,3 +25,7 @@ jobs:
             feat
             chore
             revert
+            docs
+            refactor
+            test
+            perf
