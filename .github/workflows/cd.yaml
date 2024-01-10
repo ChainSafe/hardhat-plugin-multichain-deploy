@@ -10,7 +10,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
 
-      - uses: google-github-actions/release-please-action@v3 # it will analyze commits and create PR with new version and updated CHANGELOG:md file. On merging it will create github release page with changelog
+      - uses: google-github-actions/release-please-action@v3
         id: release
         with:
           command: manifest
