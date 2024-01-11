@@ -1,4 +1,5 @@
 name: 'ci / test'
+
 on:
   push:
     branches:
@@ -6,6 +7,11 @@ on:
   pull_request:
     branches:
       - '**' # runs on update to pull request on any branch
+
+concurrency:
+  group: ci-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   # most basic test job
   test:

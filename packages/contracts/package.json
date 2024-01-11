@@ -1,7 +1,11 @@
 {
-  "name": "contracts",
+  "name": "@chainsafe/hardhat-plugin-multichain-deploy-contracts",
   "version": "0.0.1",
   "license": "MIT",
+  "files": [
+    "artifacts",
+    "contracts"
+  ],
   "scripts": {
     "build": "hardhat compile",
     "hardhat": "hardhat",
