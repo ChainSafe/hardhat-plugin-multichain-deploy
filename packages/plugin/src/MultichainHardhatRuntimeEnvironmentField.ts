@@ -7,6 +7,11 @@ import Web3, {
   ContractAbi,
   MatchPrimitiveType,
   Transaction,
+  net,
+  ContractMethodInputParameters,
+  ContractMethods,
+  AbiParameter,
+  Contract,
 } from "web3";
 import {
   getConfigEnvironmentVariable,
@@ -59,46 +64,45 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     this.isValidated = true;
   }
-
-  private async encodeFunction<Abi extends ContractAbi = any>(
+  
+  private async estimateGas(
     web3: Web3,
-    args: ContractConstructorArgs<Abi>,
-    computedContractAddress: string,
     artifact: Artifact
-  ): Promise<{
-    constructorArgs: string[];
-    initDatas: string[];
-    gasLimit: bigint;
-  }> {
-    const { hexToBytes, bytesToHex } = web3.utils;
-
+  ): Promise<bigint> {
     const Contract = new web3.eth.Contract(
       artifact.abi,
-      computedContractAddress
     );
-    const Method = Contract.deploy({
-      data: artifact.bytecode,
-      arguments: args,
-    });
-    const data = Method.encodeABI();
-    const constructorArgs = [
-      bytesToHex(hexToBytes(data).slice(hexToBytes(artifact.bytecode).length)),
-    ];
-    const initDatas = [data];
-
-    const deployGasLimit = await Method.estimateGas();
+    const deployGasLimit = await Contract.deploy().estimateGas();
     const gasLimit = deployGasLimit * BigInt(1.4);
-
-    return {
-      constructorArgs,
-      initDatas,
-      gasLimit,
-    };
+    return gasLimit
   }
 
+  private validateNetworkArgs() {
+
+  }
+
+  public encodeInitData(initMethodName: string, initMethodArgs: any) {
+
+  }
+
+  public async deployMultichainBytecode<Abi extends ContractAbi = any>(
+    bytecode: string,
+    networkArgs: Record<string, {
+      args: ContractConstructorArgs<Abi>,
+      initData?: string,
+    }>,
+    options?: {
+      salt?: MatchPrimitiveType<"bytes32", unknown>;
+      isUniquePerChain?: boolean;
+    }
+  ) {}
+
   public async deployMultichain<Abi extends ContractAbi = any>(
-    nameOrBytecode: string,
-    args: ContractConstructorArgs<Abi>,
+    name: string,
+    networkArgs: Record<string, {
+      args: ContractConstructorArgs<Abi>,
+      initData?: string,
+    }>,
     options?: {
       salt?: MatchPrimitiveType<"bytes32", unknown>;
       isUniquePerChain?: boolean;
@@ -106,14 +110,15 @@ export class MultichainHardhatRuntimeEnvironmentField {
   ): Promise<Transaction> {
     if (!this.isValidated) await this.validateConfig();
 
+    this.validateNetworkArgs();
+
     const ADAPTER_ADDRESS = "0x85d62ad850b322152bf4ad9147bfbf097da42217";
 
-    const artifact = this.hre.artifacts.readArtifactSync(nameOrBytecode);
+    const artifact = this.hre.artifacts.readArtifactSync(name); 
     const provider = this.hre.network.provider;
 
     //web3
     const web3 = new Web3(provider);
-    const [deployer] = await web3.eth.getAccounts();
 
     //optional params
     const salt = options?.salt ?? crypto.randomBytes(32).toString("hex");
@@ -121,24 +126,23 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     //adapter contract
     const adapterContract = new web3.eth.Contract(AdapterABI, ADAPTER_ADDRESS);
-    const computedContractAddress = await adapterContract.methods
-      .computeContractAddress(deployer, salt, isUniquePerChain)
-      .call();
+
 
     //deployment contract
-    const { constructorArgs, initDatas, gasLimit } = await this.encodeFunction(
-      web3,
-      args,
-      computedContractAddress,
-      artifact
+    const gasLimit = await this.estimateGas(
+      web3, artifact
     );
 
-    const initCode = artifact.bytecode;
+    //TODO - func that checks initData for given network
+    const constructorArgs = mapConstructorArgs();
+    const initDatas = mapInitData();
+
+    const deployBytecode = artifact.bytecode;
     const destinationDomainIDs = this.domainIds;
 
     const fees = await adapterContract.methods
       .calculateDeployFee(
-        initCode,
+        deployBytecode,
         gasLimit,
         salt,
         isUniquePerChain,
@@ -150,7 +154,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     const tx = await adapterContract.methods
       .deploy(
-        initCode,
+        deployBytecode,
         gasLimit,
         salt,
         isUniquePerChain,
