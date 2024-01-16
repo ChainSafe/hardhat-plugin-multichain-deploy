@@ -7,16 +7,15 @@ import Web3, {
   ContractAbi,
   MatchPrimitiveType,
   Transaction,
-  net,
-  ContractMethodInputParameters,
-  ContractMethods,
-  AbiParameter,
-  Contract,
+  Bytes,
+  utils,
 } from "web3";
 import {
   getConfigEnvironmentVariable,
   getDeploymentNetworks,
   getNetworkChainId,
+  mapNetworkArgs,
+  sumedFees,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
 
@@ -25,6 +24,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
   private domainIds: number[] = [];
 
   public constructor(private readonly hre: HardhatRuntimeEnvironment) {}
+
+  public ADAPTER_ADDRESS = "0x85d62ad850b322152bf4ad9147bfbf097da42217";
 
   private async validateConfig(): Promise<void> {
     const originChainId = await getNetworkChainId(
@@ -64,45 +65,35 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     this.isValidated = true;
   }
-  
-  private async estimateGas(
-    web3: Web3,
-    artifact: Artifact
-  ): Promise<bigint> {
-    const Contract = new web3.eth.Contract(
-      artifact.abi,
-    );
+
+  private async estimateGas(web3: Web3, artifact: Artifact): Promise<bigint> {
+    const Contract = new web3.eth.Contract(artifact.abi);
     const deployGasLimit = await Contract.deploy().estimateGas();
     const gasLimit = deployGasLimit * BigInt(1.4);
-    return gasLimit
+    return gasLimit;
   }
 
-  private validateNetworkArgs() {
-
+  public static encodeInitData(
+    artifact: Artifact,
+    initMethodName: string,
+    initMethodArgs: string[]
+  ): Bytes {
+    //TODO
+    // const contract = new Contract(artifact.abi);
+    // const encodedInitMethod = contract.methods[initMethodName](initMethodArgs).encodeABI();
+    console.log(artifact, initMethodArgs, initMethodName);
+    return utils.hexToBytes("0x");
   }
-
-  public encodeInitData(initMethodName: string, initMethodArgs: any) {
-
-  }
-
-  public async deployMultichainBytecode<Abi extends ContractAbi = any>(
-    bytecode: string,
-    networkArgs: Record<string, {
-      args: ContractConstructorArgs<Abi>,
-      initData?: string,
-    }>,
-    options?: {
-      salt?: MatchPrimitiveType<"bytes32", unknown>;
-      isUniquePerChain?: boolean;
-    }
-  ) {}
 
   public async deployMultichain<Abi extends ContractAbi = any>(
     name: string,
-    networkArgs: Record<string, {
-      args: ContractConstructorArgs<Abi>,
-      initData?: string,
-    }>,
+    networkArgs: Record<
+      string,
+      {
+        args: ContractConstructorArgs<Abi>;
+        initData?: string;
+      }
+    >,
     options?: {
       salt?: MatchPrimitiveType<"bytes32", unknown>;
       isUniquePerChain?: boolean;
@@ -110,11 +101,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
   ): Promise<Transaction> {
     if (!this.isValidated) await this.validateConfig();
 
-    this.validateNetworkArgs();
-
-    const ADAPTER_ADDRESS = "0x85d62ad850b322152bf4ad9147bfbf097da42217";
-
-    const artifact = this.hre.artifacts.readArtifactSync(name); 
+    const artifact = this.hre.artifacts.readArtifactSync(name);
     const provider = this.hre.network.provider;
 
     //web3
@@ -125,17 +112,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const isUniquePerChain = options?.isUniquePerChain ?? false;
 
     //adapter contract
-    const adapterContract = new web3.eth.Contract(AdapterABI, ADAPTER_ADDRESS);
-
-
-    //deployment contract
-    const gasLimit = await this.estimateGas(
-      web3, artifact
+    const adapterContract = new web3.eth.Contract(
+      AdapterABI,
+      this.ADAPTER_ADDRESS
     );
 
-    //TODO - func that checks initData for given network
-    const constructorArgs = mapConstructorArgs();
-    const initDatas = mapInitData();
+    const gasLimit = await this.estimateGas(web3, artifact);
+
+    const { constructorArgs, initDatas } = mapNetworkArgs(
+      artifact,
+      networkArgs
+    );
 
     const deployBytecode = artifact.bytecode;
     const destinationDomainIDs = this.domainIds;
@@ -163,7 +150,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
         destinationDomainIDs,
         fees
       )
-      .send();
+      .send({ value: sumedFees(fees) });
     return tx;
   }
 }
