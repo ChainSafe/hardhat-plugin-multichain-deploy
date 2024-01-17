@@ -1,7 +1,19 @@
 import assert from "assert";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Environment } from "@buildwithsygma/sygma-sdk-core";
-import { FMT_BYTES, FMT_NUMBER, HttpProvider, Web3 } from "web3";
+import { Artifact, HardhatRuntimeEnvironment } from "hardhat/types";
+import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
+import {
+  Bytes,
+  Contract,
+  ContractAbi,
+  ContractConstructorArgs,
+  FMT_BYTES,
+  FMT_NUMBER,
+  HttpProvider,
+  Numbers,
+  Web3,
+  utils,
+} from "web3";
+import { HardhatPluginError } from "hardhat/plugins";
 
 export function getConfigEnvironmentVariable(
   hre: HardhatRuntimeEnvironment
@@ -33,4 +45,76 @@ export function getDeploymentNetworks(
   hre: HardhatRuntimeEnvironment
 ): string[] {
   return hre.config.multichain.deploymentNetworks;
+}
+
+export function sumedFees(fees: Numbers[]): string {
+  const sumOfFees = fees.reduce(
+    (previous, current) => BigInt(previous) + BigInt(current),
+    0
+  );
+  return sumOfFees.toString();
+}
+
+export function mapNetworkArgs<Abi extends ContractAbi = any>(
+  artifact: Artifact,
+  networkArgs: Record<
+    string,
+    {
+      args: ContractConstructorArgs<Abi>;
+      initData?: Bytes;
+    }
+  >,
+  domains: Domain[]
+): {
+  deployDomainIDs: bigint[];
+  constructorArgs: string[];
+  initDatas: Bytes[];
+} {
+  const { bytesToHex, hexToBytes } = utils;
+  const contract = new Contract(artifact.abi);
+
+  const deployDomainIDs: bigint[] = [];
+  const constructorArgs: string[] = [];
+  const initDatas: Bytes[] = [];
+
+  Object.keys(networkArgs).map((networkName) => {
+    //checks if network args
+    const matchingDomain = domains.find(
+      (domain) => domain.name === networkName
+    );
+    if (matchingDomain) deployDomainIDs.push(BigInt(matchingDomain.id));
+    else {
+      throw new HardhatPluginError(
+        "@chainsafe/hardhat-plugin-multichain-deploy",
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
+      );
+    }
+
+    const encodedDeployMethod = contract
+      .deploy({
+        data: artifact.bytecode,
+        arguments: networkArgs[networkName].args,
+      })
+      .encodeABI();
+
+    const argsInBytes = bytesToHex(
+      hexToBytes(encodedDeployMethod).slice(
+        hexToBytes(artifact.bytecode).length
+      )
+    );
+
+    constructorArgs.push(argsInBytes);
+
+    if (networkArgs[networkName].initData) {
+      initDatas.push(networkArgs[networkName].initData as Bytes);
+    } else {
+      initDatas.push(hexToBytes("0x"));
+    }
+  });
+
+  return {
+    deployDomainIDs,
+    constructorArgs,
+    initDatas,
+  };
 }

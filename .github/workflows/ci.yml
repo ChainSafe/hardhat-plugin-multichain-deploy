@@ -35,6 +35,6 @@ jobs:
           key: yarn-cache
 
       - run: yarn install --immutable # install dependencies
-      - run: yarn run lint # lint code
       - run: yarn run build # compile typescript into javascript
+      - run: yarn run lint # lint code
       - run: yarn run test # run tests

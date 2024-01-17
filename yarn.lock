@@ -196,7 +196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainsafe/hardhat-plugin-multichain-deploy-contracts@workspace:packages/contracts":
+"@chainsafe/hardhat-plugin-multichain-deploy-contracts@workspace:^, @chainsafe/hardhat-plugin-multichain-deploy-contracts@workspace:packages/contracts":
   version: 0.0.0-use.local
   resolution: "@chainsafe/hardhat-plugin-multichain-deploy-contracts@workspace:packages/contracts"
   dependencies:
@@ -221,6 +221,7 @@ __metadata:
   resolution: "@chainsafe/hardhat-plugin-multichain-deploy@workspace:packages/plugin"
   dependencies:
     "@buildwithsygma/sygma-sdk-core": ^2.4.0
+    "@chainsafe/hardhat-plugin-multichain-deploy-contracts": "workspace:^"
     "@types/chai": ^4.1.7
     "@types/chai-as-promised": ^7
     "@types/eslint": ^8
