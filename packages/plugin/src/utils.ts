@@ -1,6 +1,6 @@
 import assert from "assert";
 import { Artifact, HardhatRuntimeEnvironment } from "hardhat/types";
-import { Environment } from "@buildwithsygma/sygma-sdk-core";
+import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
   Bytes,
   Contract,
@@ -13,6 +13,7 @@ import {
   Web3,
   utils,
 } from "web3";
+import { HardhatPluginError } from "hardhat/plugins";
 
 export function getConfigEnvironmentVariable(
   hre: HardhatRuntimeEnvironment
@@ -62,15 +63,33 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       args: ContractConstructorArgs<Abi>;
       initData?: Bytes;
     }
-  >
-): { constructorArgs: string[]; initDatas: Bytes[] } {
+  >,
+  domains: Domain[]
+): {
+  deployDomainIDs: bigint[];
+  constructorArgs: string[];
+  initDatas: Bytes[];
+} {
   const { bytesToHex, hexToBytes } = utils;
   const contract = new Contract(artifact.abi);
 
+  const deployDomainIDs: bigint[] = [];
   const constructorArgs: string[] = [];
   const initDatas: Bytes[] = [];
 
   Object.keys(networkArgs).map((networkName) => {
+    //checks if network args
+    const matchingDomain = domains.find(
+      (domain) => domain.name === networkName
+    );
+    if (matchingDomain) deployDomainIDs.push(BigInt(matchingDomain.id));
+    else {
+      throw new HardhatPluginError(
+        "@chainsafe/hardhat-plugin-multichain-deploy",
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
+      );
+    }
+
     const encodedDeployMethod = contract
       .deploy({
         data: artifact.bytecode,
@@ -94,6 +113,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   });
 
   return {
+    deployDomainIDs,
     constructorArgs,
     initDatas,
   };
