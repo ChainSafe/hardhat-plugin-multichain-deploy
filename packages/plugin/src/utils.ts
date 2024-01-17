@@ -56,7 +56,8 @@ export function sumedFees(fees: Numbers[]): string {
 }
 
 export function mapNetworkArgs<Abi extends ContractAbi = any>(
-  artifact: Artifact,
+  contractBytecode: string,
+  contractAbi: Abi,
   networkArgs: Record<
     string,
     {
@@ -71,7 +72,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   initDatas: Bytes[];
 } {
   const { bytesToHex, hexToBytes } = utils;
-  const contract = new Contract(artifact.abi);
+  const contract = new Contract(contractAbi);
 
   const deployDomainIDs: bigint[] = [];
   const constructorArgs: string[] = [];
@@ -92,14 +93,14 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
     const encodedDeployMethod = contract
       .deploy({
-        data: artifact.bytecode,
+        data: contractBytecode,
         arguments: networkArgs[networkName].args,
       })
       .encodeABI();
 
     const argsInBytes = bytesToHex(
       hexToBytes(encodedDeployMethod).slice(
-        hexToBytes(artifact.bytecode).length
+        hexToBytes(contractBytecode).length
       )
     );
 

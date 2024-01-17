@@ -23,7 +23,7 @@ import { AdapterABI } from "./adapterABI";
 export class MultichainHardhatRuntimeEnvironmentField {
   private isValidated: boolean = false;
   private domains: Domain[] = [];
-  private web3: Web3 | null;
+  private readonly web3: Web3 | null;
 
   public constructor(private readonly hre: HardhatRuntimeEnvironment) {
     const provider = this.hre.network.provider;
@@ -110,10 +110,29 @@ export class MultichainHardhatRuntimeEnvironmentField {
       customNonPayableTxOptions?: NonPayableCallOptions;
     }
   ): Promise<Transaction | void> {
+    const artifact = this.hre.artifacts.readArtifactSync(contractName);
+
+    return this.deployMultichainBytecode(artifact.bytecode, artifact.abi as unknown as Abi, networkArgs, options);
+  }
+
+  public async deployMultichainBytecode<Abi extends ContractAbi = any>(
+    contractBytecode: string,
+    contractAbi: Abi,
+    networkArgs: Record<
+      string,
+      {
+        args: ContractConstructorArgs<Abi>;
+        initData?: string;
+      }
+    >,
+    options?: {
+      salt?: MatchPrimitiveType<"bytes32", unknown>;
+      isUniquePerChain?: boolean;
+      customNonPayableTxOptions?: NonPayableCallOptions;
+    }
+  ): Promise<Transaction | void> {
     if (!this.isValidated) await this.validateConfig();
     if (!this.web3) return;
-
-    const artifact = this.hre.artifacts.readArtifactSync(contractName);
 
     //optional params
     const salt = options?.salt ?? utils.randomBytes(32);
@@ -126,16 +145,15 @@ export class MultichainHardhatRuntimeEnvironmentField {
     );
 
     const { constructorArgs, initDatas, deployDomainIDs } = mapNetworkArgs(
-      artifact,
+      contractBytecode,
+      contractAbi,
       networkArgs,
       this.domains
     );
 
-    const deployBytecode = artifact.bytecode;
-
     const fees = await adapterContract.methods
       .calculateDeployFee(
-        deployBytecode,
+        contractBytecode,
         this.gasLimit,
         salt,
         isUniquePerChain,
@@ -154,9 +172,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
       };
     }
 
-    const tx = await adapterContract.methods
+    return adapterContract.methods
       .deploy(
-        deployBytecode,
+        contractBytecode,
         this.gasLimit,
         salt,
         isUniquePerChain,
@@ -166,7 +184,5 @@ export class MultichainHardhatRuntimeEnvironmentField {
         fees
       )
       .send(payableTxOptions);
-
-    return tx;
   }
 }
