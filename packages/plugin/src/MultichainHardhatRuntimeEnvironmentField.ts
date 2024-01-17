@@ -68,7 +68,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
           .map(({ chainId, name }) => `${name}(${chainId})`)
           .join(", ")
           .replace(/, ([^,]*)$/, " and $1")}\n` +
-          `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
+        `Please adjust your 'deploymentNetworks' to align with the supported routes in this environment. For details on supported networks, refer to the Sygma documentation.`
       );
 
     this.isValidated = true;
@@ -120,7 +120,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const isUniquePerChain = options?.isUniquePerChain ?? false;
 
     //adapter contract
-    const adapterContract = new this.web3.eth.Contract(
+    const adapterContract = new this.web3.eth.Contract<typeof AdapterABI>(
       AdapterABI,
       this.ADAPTER_ADDRESS
     );

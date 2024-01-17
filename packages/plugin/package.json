@@ -48,6 +48,7 @@
     "hardhat": "^2.0.0"
   },
   "dependencies": {
+    "@chainsafe/hardhat-plugin-multichain-deploy-contracts": "workspace:^",
     "web3": "^4.3.0"
   }
 }
