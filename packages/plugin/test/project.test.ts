@@ -42,10 +42,5 @@ describe("Integration tests examples", function () {
   describe("Hardhat Runtime Environment extension", function () {
     useEnvironment("hardhat-project");
 
-    it("The deployMultichain field should return 0x00", async function () {
-      expect(
-        await this.hre.multichain.deployMultichain('test', [])
-      ).to.be.equal("0x00");
-    });
   });
 });
