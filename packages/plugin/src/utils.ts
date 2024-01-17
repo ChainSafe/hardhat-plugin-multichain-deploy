@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Artifact, HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
   Bytes,
@@ -99,9 +99,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       .encodeABI();
 
     const argsInBytes = bytesToHex(
-      hexToBytes(encodedDeployMethod).slice(
-        hexToBytes(contractBytecode).length
-      )
+      hexToBytes(encodedDeployMethod).slice(hexToBytes(contractBytecode).length)
     );
 
     constructorArgs.push(argsInBytes);

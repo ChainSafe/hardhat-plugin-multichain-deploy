@@ -2,14 +2,11 @@ import { Artifact, HardhatRuntimeEnvironment } from "hardhat/types";
 import { Config, Domain } from "@buildwithsygma/sygma-sdk-core";
 import { HardhatPluginError } from "hardhat/plugins";
 import Web3, {
-  ContractConstructorArgs,
   ContractAbi,
-  MatchPrimitiveType,
   Transaction,
   Bytes,
   utils,
   PayableCallOptions,
-  NonPayableCallOptions,
 } from "web3";
 import {
   getConfigEnvironmentVariable,
@@ -19,6 +16,7 @@ import {
   sumedFees,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
+import { DeployOptions, NetworkArguments } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isValidated: boolean = false;
@@ -97,39 +95,24 @@ export class MultichainHardhatRuntimeEnvironmentField {
    */
   public async deployMultichain<Abi extends ContractAbi = any>(
     contractName: string,
-    networkArgs: Record<
-      string,
-      {
-        args: ContractConstructorArgs<Abi>;
-        initData?: string;
-      }
-    >,
-    options?: {
-      salt?: MatchPrimitiveType<"bytes32", unknown>;
-      isUniquePerChain?: boolean;
-      customNonPayableTxOptions?: NonPayableCallOptions;
-    }
+    networkArgs: NetworkArguments<Abi>,
+    options?: DeployOptions
   ): Promise<Transaction | void> {
     const artifact = this.hre.artifacts.readArtifactSync(contractName);
 
-    return this.deployMultichainBytecode(artifact.bytecode, artifact.abi as unknown as Abi, networkArgs, options);
+    return this.deployMultichainBytecode(
+      artifact.bytecode,
+      artifact.abi as unknown as Abi,
+      networkArgs,
+      options
+    );
   }
 
   public async deployMultichainBytecode<Abi extends ContractAbi = any>(
     contractBytecode: string,
     contractAbi: Abi,
-    networkArgs: Record<
-      string,
-      {
-        args: ContractConstructorArgs<Abi>;
-        initData?: string;
-      }
-    >,
-    options?: {
-      salt?: MatchPrimitiveType<"bytes32", unknown>;
-      isUniquePerChain?: boolean;
-      customNonPayableTxOptions?: NonPayableCallOptions;
-    }
+    networkArgs: NetworkArguments<Abi>,
+    options?: DeployOptions
   ): Promise<Transaction | void> {
     if (!this.isValidated) await this.validateConfig();
     if (!this.web3) return;
