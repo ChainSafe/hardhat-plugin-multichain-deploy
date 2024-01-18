@@ -41,12 +41,6 @@ export async function getNetworkChainId(
   return chainID;
 }
 
-export function getDeploymentNetworks(
-  hre: HardhatRuntimeEnvironment
-): string[] {
-  return hre.config.multichain.deploymentNetworks;
-}
-
 export function sumedFees(fees: Numbers[]): string {
   const sumOfFees = fees.reduce(
     (previous, current) => BigInt(previous) + BigInt(current),
@@ -79,7 +73,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   const initDatas: Bytes[] = [];
 
   Object.keys(networkArgs).map((networkName) => {
-    //checks if network args
+    //checks if destination networks name is valid
     const matchingDomain = domains.find(
       (domain) => domain.name === networkName
     );
@@ -87,7 +81,12 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     else {
       throw new HardhatPluginError(
         "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.
+        Available networks: ${domains
+          .map((domain): string => `${domain.name}`)
+          .join(", ")
+          .replace(/, ([^,]*)$/, "")}\n
+        `
       );
     }
 
