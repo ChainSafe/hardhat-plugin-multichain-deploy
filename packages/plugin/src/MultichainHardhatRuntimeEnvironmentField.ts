@@ -85,11 +85,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
   }
 
   /**
-   * deployMultichain deploy contract to multiple chains
+   * Deploys a contract to multiple blockchain networks.
    *
-   * @param contractName - Name of contract developed in project
-   * @param networkArgs - object of network's with arguments where will be deployed, for more information check {@link NetworkArguments}
-   * @param [options] - Additional options that can be provided into deployer, for more information check {@link DeployOptions}
+   * @param contractName - The name of the contract to be deployed.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. See {@link NetworkArguments}.
+   * @param options - Optional settings for the deployment process. See {@link DeployOptions}.
+   * @returns A Promise resolving to a Transaction object or void.
+   *
+   * @tutorial readme
+   *
+   * @example
+   * // TODO
    */
   public async deployMultichain<Abi extends ContractAbi = any>(
     contractName: string,
@@ -107,10 +113,16 @@ export class MultichainHardhatRuntimeEnvironmentField {
   }
 
   /**
-   * @param contractBytecode - bytecode of contract
-   * @param contractAbi - abi of that contract
-   * @param networkArgs - record key is name of the networks on which contract is being deployed {@link NetworkArguments}
-   * @param [options] - Additional options that can be provided into method {@link DeployOptions}
+   * Deploys a contract using its bytecode and ABI to multiple blockchain networks.
+   *
+   * @param contractBytecode - The bytecode of the contract to be deployed. This is the compiled code of the contract.
+   * @param contractAbi - The ABI (Application Binary Interface) of the contract. It defines the methods and structures used to interact with the binary contract.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link DeployOptions}.
+   * @returns A Promise resolving to a Transaction object or void.
+   *
+   * @example
+   * // TODO: Add example usage
    */
   public async deployMultichainBytecode<Abi extends ContractAbi = any>(
     contractBytecode: string,
