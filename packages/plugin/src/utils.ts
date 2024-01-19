@@ -3,7 +3,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
   Bytes,
-  Contract,
   ContractAbi,
   ContractConstructorArgs,
   FMT_BYTES,
@@ -11,6 +10,7 @@ import {
   HttpProvider,
   Numbers,
   Web3,
+  eth,
   utils,
 } from "web3";
 import { HardhatPluginError } from "hardhat/plugins";
@@ -50,7 +50,6 @@ export function sumedFees(fees: Numbers[]): string {
 }
 
 export function mapNetworkArgs<Abi extends ContractAbi = any>(
-  contractBytecode: string,
   contractAbi: Abi,
   networkArgs: Record<
     string,
@@ -65,9 +64,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   constructorArgs: string[];
   initDatas: Bytes[];
 } {
-  const { bytesToHex, hexToBytes } = utils;
-  const contract = new Contract(contractAbi);
-
+  const { hexToBytes } = utils;
   const deployDomainIDs: bigint[] = [];
   const constructorArgs: string[] = [];
   const initDatas: Bytes[] = [];
@@ -90,15 +87,19 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       );
     }
 
-    const encodedDeployMethod = contract
-      .deploy({
-        data: contractBytecode,
-        arguments: networkArgs[networkName].args,
-      })
-      .encodeABI();
+    const constructorAbi = contractAbi.filter(
+      (f) => f.type === "constructor"
+    )[0].inputs;
 
-    const argsInBytes = bytesToHex(
-      hexToBytes(encodedDeployMethod).slice(hexToBytes(contractBytecode).length)
+    if (!constructorAbi)
+      throw new HardhatPluginError(
+        "@chainsafe/hardhat-plugin-multichain-deploy",
+        `Unable to find constructior paramaters`
+      );
+
+    const argsInBytes = eth.abi.encodeParameters(
+      constructorAbi,
+      networkArgs[networkName].args
     );
 
     constructorArgs.push(argsInBytes);

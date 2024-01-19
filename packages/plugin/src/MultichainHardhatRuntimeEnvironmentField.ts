@@ -102,7 +102,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
     );
 
     const { constructorArgs, initDatas, deployDomainIDs } = mapNetworkArgs(
-      contractBytecode,
       contractAbi,
       networkArgs,
       this.domains
