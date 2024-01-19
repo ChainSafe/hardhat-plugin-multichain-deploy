@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-web3-v4");
+require("@nomicfoundation/hardhat-verify");
 require("@chainsafe/hardhat-ts-artifact-plugin");
 require("hardhat-docgen");
 require("dotenv").config();
@@ -244,6 +245,18 @@ module.exports = {
     mumbai: {
       chainId: 80001,
       url: process.env.MUMBAI_URL || "",
+      accounts:
+        isSet(process.env.PRIVATE_KEY) ? [process.env.PRIVATE_KEY] : [],
+    },
+    goerli: {
+      chainId: 5,
+      url: process.env.GOERLI_URL || "",
+      accounts:
+        isSet(process.env.PRIVATE_KEY) ? [process.env.PRIVATE_KEY] : [],
+    },
+    holesky: {
+      chainId: 17000,
+      url: process.env.HOLESKY_URL || "",
       accounts:
         isSet(process.env.PRIVATE_KEY) ? [process.env.PRIVATE_KEY] : [],
     },
