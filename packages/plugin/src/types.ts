@@ -7,8 +7,8 @@ import {
 
 /**
  * NetworkArgument
- * @property {boolean} args - Indicates whether the Courage component is present.
- * @property {string} initData - Indicates whether the Power component is present.
+ * @property args - Indicates whether args is providing.
+ * @property initData - Indicates whether the init data.
  */
 interface NetworkArgument<Abi extends ContractAbi = any> {
   args: ContractConstructorArgs<Abi>;
@@ -17,7 +17,7 @@ interface NetworkArgument<Abi extends ContractAbi = any> {
 
 /**
  * NetworkArguments
- * @property {NetworkArgument} [network] - NetworkArgument
+ * @property [network] - NetworkArgument
  */
 export interface NetworkArguments<Abi extends ContractAbi = any> {
   [network: string]: NetworkArgument<Abi>;
@@ -26,9 +26,9 @@ export interface NetworkArguments<Abi extends ContractAbi = any> {
 /**
  * Options used for contract deployment
  *
- * @property {Uint8Array | string} [salt] - Indicates whether the Courage component is present.
- * @property {Boolean} [isUniquePerChain] - Indicates whether the Power component is present.
- * @property {NonPayableCallOptions} [customNonPayableTxOptions] - Indicates whether the Wisdom component is present.
+ * @property [salt] - Indicates whether salt is present, as Uint8Array or HexString.
+ * @property [isUniquePerChain] - Indicates whether contract address is uniq per deployment.
+ * @property [customNonPayableTxOptions] - Indicates whether the Wisdom component is present.
  */
 export interface DeployOptions {
   salt?: MatchPrimitiveType<"bytes32", unknown>;

@@ -88,11 +88,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * Deploys a contract to multiple blockchain networks.
    *
    * @param contractName - The name of the contract to be deployed.
-   * @param networkArgs - An object mapping network identifiers to their deployment arguments. See {@link NetworkArguments}.
-   * @param options - Optional settings for the deployment process. See {@link DeployOptions}.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions}.
    * @returns A Promise resolving to a Transaction object or void.
-   *
-   * @tutorial readme
    *
    * @example
    * // TODO
@@ -117,8 +115,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
    *
    * @param contractBytecode - The bytecode of the contract to be deployed. This is the compiled code of the contract.
    * @param contractAbi - The ABI (Application Binary Interface) of the contract. It defines the methods and structures used to interact with the binary contract.
-   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link NetworkArguments}.
-   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link DeployOptions}.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions}.
    * @returns A Promise resolving to a Transaction object or void.
    *
    * @example
