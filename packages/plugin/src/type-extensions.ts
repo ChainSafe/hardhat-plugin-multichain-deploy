@@ -11,7 +11,6 @@ declare module "hardhat/types/config" {
 
   export interface MultichainConfig {
     environment: Environment;
-    deploymentNetworks: string[];
   }
 
   export interface HardhatUserConfig {

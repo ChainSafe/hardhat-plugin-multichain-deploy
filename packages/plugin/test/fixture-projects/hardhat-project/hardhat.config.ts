@@ -19,7 +19,6 @@ const config: HardhatUserConfig = {
   },
   multichain: {
     environment: Environment.TESTNET,
-    deploymentNetworks: ["sepolia"],
   },
 };
 

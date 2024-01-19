@@ -36,5 +36,7 @@ To deploy to other networks, replace the `mainnet` with the network name from th
 
     sepolia
     mumbai
+    goerli
+    holesky
 
 You could optionally set your ETHERSCAN_API key, and use `--verify true` in order to publish the source code after deployemnt.
