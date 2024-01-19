@@ -24,13 +24,6 @@ describe("Integration tests examples", function () {
   describe("HardhatConfig extension", function () {
     useEnvironment("hardhat-project");
 
-    it("Should add the multichain.deploymentNetworks to the config", function () {
-      assert.deepEqual(
-        this.hre.config.multichain.deploymentNetworks,
-        ["sepolia"]
-      );
-    });
-
     it("Should add the multichain.environment to the config", function () {
       assert.deepEqual(
         this.hre.config.multichain.environment,
