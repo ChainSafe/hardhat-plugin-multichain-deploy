@@ -4,7 +4,6 @@ import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
   Bytes,
   ContractAbi,
-  ContractConstructorArgs,
   FMT_BYTES,
   FMT_NUMBER,
   HttpProvider,
@@ -14,6 +13,7 @@ import {
   utils,
 } from "web3";
 import { HardhatPluginError } from "hardhat/plugins";
+import { NetworkArguments } from "./types";
 
 export function getConfigEnvironmentVariable(
   hre: HardhatRuntimeEnvironment
@@ -51,13 +51,7 @@ export function sumedFees(fees: Numbers[]): string {
 
 export function mapNetworkArgs<Abi extends ContractAbi = any>(
   contractAbi: Abi,
-  networkArgs: Record<
-    string,
-    {
-      args: ContractConstructorArgs<Abi>;
-      initData?: Bytes;
-    }
-  >,
+  networkArgs: NetworkArguments<Abi>,
   domains: Domain[]
 ): {
   deployDomainIDs: bigint[];
@@ -91,18 +85,31 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       (f) => f.type === "constructor"
     )[0].inputs;
 
-    if (!constructorAbi)
-      throw new HardhatPluginError(
-        "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unable to find constructor paramaters`
+    if (constructorAbi) {
+      //throws if user did not provide constructor args for network
+      if (!networkArgs[networkName].args)
+        throw new HardhatPluginError(
+          "@chainsafe/hardhat-plugin-multichain-deploy",
+          `Contract ABI provided required constructor arguments for ${networkName}`
+        );
+
+      const argsInBytes = eth.abi.encodeParameters(
+        constructorAbi,
+        networkArgs[networkName].args as unknown[]
       );
-
-    const argsInBytes = eth.abi.encodeParameters(
-      constructorAbi,
-      networkArgs[networkName].args
-    );
-
-    constructorArgs.push(argsInBytes);
+      //provided constructorAbi with args
+      constructorArgs.push(argsInBytes);
+    } else {
+      //throws if user provides args and none are in abi
+      if (networkArgs[networkName].args)
+        throw new HardhatPluginError(
+          "@chainsafe/hardhat-plugin-multichain-deploy",
+          `Contract ABI provided doesn't contain a constructor definition. 
+            If provided contract should't have constructor, do not provide args parameter for ${networkName}.`
+        );
+      //no constructorAbi and no args
+      constructorArgs.push("0x");
+    }
 
     if (networkArgs[networkName].initData) {
       initDatas.push(networkArgs[networkName].initData as Bytes);
