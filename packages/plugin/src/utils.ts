@@ -49,7 +49,7 @@ export function sumedFees(fees: Numbers[]): string {
   return sumOfFees.toString();
 }
 
-export function mapNetworkArgs<Abi extends ContractAbi = any>(
+export function validateNetworkArgs<Abi extends ContractAbi = any>(
   contractBytecode: string,
   contractAbi: Abi,
   networkArgs: Record<
@@ -81,15 +81,11 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     else {
       throw new HardhatPluginError(
         "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.
-        Available networks: ${domains
-          .map((domain): string => `${domain.name}`)
-          .join(", ")
-          .replace(/, ([^,]*)$/, "")}\n
-        `
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
       );
     }
 
+    //encodes constructor args in bytes
     const encodedDeployMethod = contract
       .deploy({
         data: contractBytecode,
@@ -103,6 +99,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
     constructorArgs.push(argsInBytes);
 
+    //pushes encoded initData if provided
     if (networkArgs[networkName].initData) {
       initDatas.push(networkArgs[networkName].initData as Bytes);
     } else {

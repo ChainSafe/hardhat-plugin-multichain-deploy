@@ -5,12 +5,14 @@ import {
   NonPayableCallOptions,
 } from "web3";
 
-export interface NetworkArguments<Abi extends ContractAbi = any> {
-  [network: string]: {
+export type DeploymentNetwork = "ethereum" | "sepolia" | "mumbai";
+
+export type NetworkArguments<Abi extends ContractAbi = any> = {
+  [network in DeploymentNetwork]: {
     args: ContractConstructorArgs<Abi>;
     initData?: string;
   };
-}
+};
 
 export interface DeployOptions {
   salt?: MatchPrimitiveType<"bytes32", unknown>;
