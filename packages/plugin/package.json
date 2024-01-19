@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@chainsafe/hardhat-plugin-multichain-deploy-contracts": "workspace:^",
+    "dotenv": "^16.3.1",
     "web3": "^4.3.0"
   }
 }

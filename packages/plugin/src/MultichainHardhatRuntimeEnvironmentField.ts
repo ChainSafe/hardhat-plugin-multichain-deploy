@@ -26,7 +26,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.web3 = new Web3(provider);
   }
 
-  public ADAPTER_ADDRESS = "0x85d62ad850b322152bf4ad9147bfbf097da42217";
+  public ADAPTER_ADDRESS =
+    process.env.ADAPTER_ADDRESS ?? "0x85d62ad850b322152bf4ad9147bfbf097da42217";
 
   //current Sygma hardcoded gasLimit
   private gasLimit = 1000000;
