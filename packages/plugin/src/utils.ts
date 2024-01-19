@@ -94,7 +94,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     if (!constructorAbi)
       throw new HardhatPluginError(
         "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unable to find constructior paramaters`
+        `Unable to find constructor paramaters`
       );
 
     const argsInBytes = eth.abi.encodeParameters(
