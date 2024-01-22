@@ -5,7 +5,7 @@ import {
   NonPayableCallOptions,
 } from "web3";
 
-export type DeploymentNetwork = "ethereum" | "sepolia" | "mumbai";
+export type DeploymentNetwork = "ethereum" | "sepolia" | "mumbai" | string;
 
 export type NetworkArguments<Abi extends ContractAbi = any> = {
   [network in DeploymentNetwork]: {

@@ -10,7 +10,7 @@ import Web3, {
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
-  validateNetworkArgs,
+  formatNetworkArgs,
   sumedFees,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
@@ -101,7 +101,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
       this.ADAPTER_ADDRESS
     );
 
-    const { constructorArgs, initDatas, deployDomainIDs } = validateNetworkArgs(
+    const { constructorArgs, initDatas, deployDomainIDs } = formatNetworkArgs(
       contractBytecode,
       contractAbi,
       networkArgs,

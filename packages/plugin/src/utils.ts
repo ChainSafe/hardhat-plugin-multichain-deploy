@@ -49,7 +49,7 @@ export function sumedFees(fees: Numbers[]): string {
   return sumOfFees.toString();
 }
 
-export function validateNetworkArgs<Abi extends ContractAbi = any>(
+export function formatNetworkArgs<Abi extends ContractAbi = any>(
   contractBytecode: string,
   contractAbi: Abi,
   networkArgs: Record<
