@@ -95,7 +95,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
       const argsInBytes = eth.abi.encodeParameters(
         constructorAbi,
-        networkArgs[networkName].args as unknown[]
+        networkArgs[networkName].args!
       );
       //provided constructorAbi with args
       constructorArgs.push(argsInBytes);
