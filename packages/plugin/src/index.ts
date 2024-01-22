@@ -6,11 +6,8 @@ import {
   MultichainConfig,
 } from "hardhat/types";
 import { Environment } from "@buildwithsygma/sygma-sdk-core";
-import dotenv from "dotenv";
 import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
 import "./type-extensions";
-
-dotenv.config();
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
