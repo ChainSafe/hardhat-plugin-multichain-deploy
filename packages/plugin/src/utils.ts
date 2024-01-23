@@ -84,10 +84,11 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     const constructorAbi = contractAbi.filter(
       (f) => f.type === "constructor"
     )[0].inputs;
+    const networkConstructorArgs = networkArgs[networkName].args;
 
     if (constructorAbi) {
       //throws if user did not provide constructor args for network
-      if (!networkArgs[networkName].args)
+      if (!networkConstructorArgs)
         throw new HardhatPluginError(
           "@chainsafe/hardhat-plugin-multichain-deploy",
           `Contract ABI provided required constructor arguments for ${networkName}`
@@ -95,13 +96,13 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
       const argsInBytes = eth.abi.encodeParameters(
         constructorAbi,
-        networkArgs[networkName].args!
+        networkConstructorArgs
       );
       //provided constructorAbi with args
       constructorArgs.push(argsInBytes);
     } else {
       //throws if user provides args and none are in abi
-      if (networkArgs[networkName].args)
+      if (networkConstructorArgs)
         throw new HardhatPluginError(
           "@chainsafe/hardhat-plugin-multichain-deploy",
           `Contract ABI provided doesn't contain a constructor definition. 
