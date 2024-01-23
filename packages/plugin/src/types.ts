@@ -7,7 +7,7 @@ import {
 
 export interface NetworkArguments<Abi extends ContractAbi = any> {
   [network: string]: {
-    args: ContractConstructorArgs<Abi>;
+    args?: ContractConstructorArgs<Abi>;
     initData?: string;
   };
 }
