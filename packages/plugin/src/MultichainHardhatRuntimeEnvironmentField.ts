@@ -70,7 +70,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * ```
    * const networkArgs = {
    *    sepolia: {
-   *      args: [ TODO ],
+   *      args: [ 18, "token" ],
    *    },
    *    goerli: { ... },
    * };
@@ -100,9 +100,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * Deploys a contract using its bytecode and ABI to multiple blockchain networks.
    *
    * @param contractBytecode - The bytecode of the contract to be deployed. This is the compiled code of the contract.
-   * @param contractAbi - The ABI (Application Binary Interface) of the contract. It defines the methods and structures used to interact with the binary contract.
-   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments | NetworkArguments}.
-   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions | DeployOptions}.
+   * @param contractAbi - The ABI of the contract. It defines the methods and structures used to interact with the binary contract.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions DeployOptions}.
    * @returns A Promise resolving to a Transaction object or void.
    *
    * @example
