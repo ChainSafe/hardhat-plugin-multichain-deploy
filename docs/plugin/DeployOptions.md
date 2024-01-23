@@ -5,7 +5,7 @@ DeployOptions provides additional configuration settings for deploying smart con
 ## Interface
 
 ```ts
-export interface DeployOptions {
+interface DeployOptions {
   salt?: MatchPrimitiveType<"bytes32", unknown>;
   isUniquePerChain?: boolean;
   customNonPayableTxOptions?: NonPayableCallOptions;
