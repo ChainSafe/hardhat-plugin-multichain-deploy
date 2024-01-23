@@ -107,12 +107,12 @@ export class MultichainHardhatRuntimeEnvironmentField {
    *
    * @example
    * ```
-   * const contractBytecode = "0x60a060405234801561001057600080fd5b5060405161052b38038061052b83398";
+   * const contractBytecode = "0x60a060405234801561001057600080fd5b5060405161052b38038061052b83...";
    * const contractAbi = [{ ... }, { ... }];
    *
    * const networkArgs = {
    *    sepolia: {
-   *      args: [ TODO ],
+   *      args: [ 18, "token" ],
    *    },
    *    goerli: { ... },
    * };
