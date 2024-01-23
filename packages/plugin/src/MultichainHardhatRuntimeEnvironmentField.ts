@@ -62,12 +62,24 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * Deploys a contract to multiple blockchain networks.
    *
    * @param contractName - The name of the contract to be deployed.
-   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments}.
-   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions}.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions DeployOptions}.
    * @returns A Promise resolving to a Transaction object or void.
    *
    * @example
-   * // TODO
+   * ```
+   * const networkArgs = {
+   *    sepolia: {
+   *      args: [ TODO ],
+   *    },
+   *    goerli: { ... },
+   * };
+   * const options = {
+   *    salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
+   * };
+   *
+   * this.hre.multichain.deployMultichain("HelloContract", networkArgs, options);
+   * ```
    */
   public async deployMultichain<Abi extends ContractAbi = any>(
     contractName: string,
@@ -89,12 +101,27 @@ export class MultichainHardhatRuntimeEnvironmentField {
    *
    * @param contractBytecode - The bytecode of the contract to be deployed. This is the compiled code of the contract.
    * @param contractAbi - The ABI (Application Binary Interface) of the contract. It defines the methods and structures used to interact with the binary contract.
-   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments}.
-   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions]{@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions}.
+   * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments | NetworkArguments}.
+   * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions | DeployOptions}.
    * @returns A Promise resolving to a Transaction object or void.
    *
    * @example
-   * // TODO: Add example usage
+   * ```
+   * const contractBytecode = "0x60a060405234801561001057600080fd5b5060405161052b38038061052b83398";
+   * const contractAbi = [{ ... }, { ... }];
+   *
+   * const networkArgs = {
+   *    sepolia: {
+   *      args: [ TODO ],
+   *    },
+   *    goerli: { ... },
+   * };
+   * const options = {
+   *    salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
+   * };
+   *
+   * this.hre.multichain.deployMultichain(contractBytecode, contractAbi, networkArgs, options);
+   * ```
    */
   public async deployMultichainBytecode<Abi extends ContractAbi = any>(
     contractBytecode: string,
