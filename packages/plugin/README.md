@@ -28,11 +28,26 @@ import "@chainsafe/hardhat-plugin-multichain-deploy";
 The package introduces a `multichain` namespace to the Hardhat Runtime Environment (HRE).
 
 New methods introduced:
- * `async waitInitialization(): Promise<void>`: Returns a promise. Wait for this promise to resolve to ensure readiness for using Sygma.
- * `async deployMultichain(nameOrBytecode: string, arguments: string[], options?: Object): Promise<TxHash>`: Deploys a smart contract.
-   * `nameOrBytecode`: Name or bytecode of the smart contract.
-   * `arguments`: Arguments for the smart contract deployment.
-   * `options`: Additional deployment options (details TBD).
+```ts
+async deployMultichain<Abi extends ContractAbi = any>(
+        contractName: string,
+        networkArgs: NetworkArguments<Abi>,
+        options?: DeployOptions
+): Promise<Transaction | void>
+
+async deployMultichainBytecode<Abi extends ContractAbi = any>(
+        contractBytecode: string,
+        contractAbi: Abi,
+        networkArgs: NetworkArguments<Abi>,
+        options?: DeployOptions
+): Promise<Transaction | void> {
+```
+
+ * `contractName`: The name of the contract to be deployed.
+ * `contractBytecode`: The bytecode of the contract to be deployed. This is the compiled code of the contract.
+ * `contractAbi`: The ABI of the contract. It defines the methods and structures used to interact with the binary contract.
+ * `networkArgs`: An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments.md](../../docs/plugin/NetworkArguments.md)
+ * `options`: Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions.md](../../docs/plugin/DeployOptions.md)
 
 ## Configuration
 
@@ -42,9 +57,6 @@ This plugin extends introduce new name space called `multichain` with options:
  * `environment`: Specifies the Sygma environment for deployment.
    * Import `Environment` from `@buildwithsygma/sygma-sdk-core` for constant values.
    * Options: `mainnet`, `testnet`, `devnet`, `local`.
- * `deploymentNetworks`: List of networks for deployment.
-   * Ensure network names match those in `networks`.
-   * Networks must correspond with Sygma routes. Refer to [Sygma documentation](https://docs.buildwithsygma.com/environments) for routes.
 
 Example configuration:
 
@@ -61,7 +73,6 @@ const config: HardhatUserConfig = {
     },
     multichain: {
         environment: Environment.TESTNET,
-        deploymentNetworks: ["sepolia", "optimisticGoerli"],
     },
 };
 ```
