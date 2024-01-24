@@ -15,6 +15,9 @@ const config: HardhatUserConfig = {
     goerli: {
       chainId: 5,
       url: 'https://localhost:8080'
+    },
+    goerliNoChainId: {
+      url: 'https://localhost:8080'
     }
   },
   multichain: {
