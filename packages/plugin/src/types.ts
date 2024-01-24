@@ -1,6 +1,7 @@
 import {
   ContractAbi,
   ContractConstructorArgs,
+  ContractMethodInputParameters,
   MatchPrimitiveType,
   NonPayableCallOptions,
 } from "web3";
@@ -8,7 +9,10 @@ import {
 export interface NetworkArguments<Abi extends ContractAbi = any> {
   [network: string]: {
     args?: ContractConstructorArgs<Abi>;
-    initData?: string;
+    initData?: {
+      initMethodName: string;
+      initMethodArgs: ContractMethodInputParameters<Abi>;
+    };
   };
 }
 
