@@ -6,8 +6,11 @@ import Web3, {
   Bytes,
   utils,
   PayableCallOptions,
+  ContractMethodInputParameters,
+  AbiFunctionFragment,
 } from "web3";
 import { vars } from "hardhat/config";
+import { HardhatPluginError } from "hardhat/internal/core/errors";
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
@@ -47,19 +50,28 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     this.domains = config.getDomains();
 
-    this.isValidated = true;
+    this.isValidated;
   }
 
-  public static encodeInitData(
+  public encodeInitData<Abi extends ContractAbi = any>(
     artifact: Artifact,
     initMethodName: string,
-    initMethodArgs: string[]
+    initMethodArgs: ContractMethodInputParameters<Abi>
   ): Bytes {
-    //TODO
-    // const contract = new Contract(artifact.abi);
-    // const encodedInitMethod = contract.methods[initMethodName](initMethodArgs).encodeABI();
-    console.log(artifact, initMethodArgs, initMethodName);
-    return utils.hexToBytes("0x");
+    const initMethodAbiFragment: AbiFunctionFragment | undefined =
+      artifact.abi.find(
+        (fragment: AbiFunctionFragment) => fragment.name === initMethodName
+      ) as AbiFunctionFragment | undefined;
+    if (!initMethodAbiFragment)
+      throw new HardhatPluginError(
+        "@chainsafe/hardhat-plugin-multichain-deploy",
+        `InitMethod ${initMethodName} not foud in ABI`
+      );
+
+    return this.web3!.eth.abi.encodeFunctionCall(
+      initMethodAbiFragment,
+      initMethodArgs
+    );
   }
 
   /**
