@@ -5,7 +5,6 @@ import {
   AbiFallbackFragment,
   Bytes,
   ContractAbi,
-  ContractMethodInputParameters,
   FMT_BYTES,
   FMT_NUMBER,
   HttpProvider,
@@ -54,7 +53,7 @@ export function sumedFees(fees: Numbers[]): string {
 export function encodeInitData<Abi extends ContractAbi>(
   abi: Abi,
   initMethodName: string,
-  initMethodArgs: ContractMethodInputParameters<Abi>
+  initMethodArgs: unknown[]
 ): Bytes {
   const initMethodAbiFragment = (
     abi as unknown as Array<AbiFallbackFragment>
