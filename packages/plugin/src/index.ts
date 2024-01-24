@@ -6,9 +6,7 @@ import {
   MultichainConfig,
 } from "hardhat/types";
 import { Environment } from "@buildwithsygma/sygma-sdk-core";
-
 import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
-
 import "./type-extensions";
 
 extendConfig(

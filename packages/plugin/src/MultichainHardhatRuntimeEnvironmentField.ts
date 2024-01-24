@@ -7,11 +7,12 @@ import Web3, {
   utils,
   PayableCallOptions,
 } from "web3";
+import { vars } from "hardhat/config";
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
-  formatNetworkArgs,
   sumedFees,
+  mapNetworkArgs,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
 import { DeployOptions, NetworkArguments } from "./types";
@@ -26,7 +27,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.web3 = new Web3(provider);
   }
 
-  public ADAPTER_ADDRESS = "0x85d62ad850b322152bf4ad9147bfbf097da42217";
+  public ADAPTER_ADDRESS = vars.get(
+    "ADAPTER_ADDRESS",
+    "0x85d62ad850b322152bf4ad9147bfbf097da42217"
+  );
 
   //current Sygma hardcoded gasLimit
   private gasLimit = 1000000;
@@ -101,8 +105,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
       this.ADAPTER_ADDRESS
     );
 
-    const { constructorArgs, initDatas, deployDomainIDs } = formatNetworkArgs(
-      contractBytecode,
+    const { constructorArgs, initDatas, deployDomainIDs } = mapNetworkArgs(
       contractAbi,
       networkArgs,
       this.domains
