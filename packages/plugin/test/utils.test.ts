@@ -1,12 +1,11 @@
 import 'mocha'
-import {assert, use} from "chai";
+import {assert, expect, use} from "chai";
 import chaiAsPromised from "chai-as-promised";
 
 import { useEnvironment } from "./helpers";
 import {Environment} from "@buildwithsygma/sygma-sdk-core";
 import {getConfigEnvironmentVariable, getNetworkChainId} from "../src/utils";
-import sinon, {SinonSandbox} from "sinon";
-import {HttpProvider, Web3} from "web3";
+import sinon from "sinon";
 
 use(chaiAsPromised);
 
@@ -24,22 +23,13 @@ describe("Unit tests for utils", function () {
 
   describe("getNetworkChainId", function () {
     useEnvironment("hardhat-project");
+    let sandbox: sinon.SinonSandbox;
 
-    let sandbox: SinonSandbox;
-    let web3Stub: sinon.SinonStubbedInstance<Web3>;
-
-    beforeEach(() => {
+    beforeEach(function () {
       sandbox = sinon.createSandbox();
-
-      const ethStub = { eth: { getChainId: sandbox.stub() } };
-
-      // @ts-ignore
-      web3Stub = sandbox.createStubInstance(Web3, ethStub);
-      // @ts-ignore
-      web3Stub.eth.getChainId.resolves(5);
     });
 
-    afterEach(() => {
+    afterEach(function () {
       sandbox.restore();
     });
 
@@ -50,10 +40,24 @@ describe("Unit tests for utils", function () {
       console.log(chainID);
     });
 
-    it("should work with http", async function () {
-      const chainId = await getNetworkChainId('goerliNoChainId', this.hre);
+    it('should fetch the chain ID using a mocked HttpProviderClass', async function () {
+      class MockHttpProvider {
+        // @ts-ignore
+        constructor(clientUrl, httpProviderOptions) {}
 
-      console.log(chainId)
+        // @ts-ignore
+        async request(payload, requestOptions) {
+          console.log("MockHttpProvider", payload, requestOptions);
+
+          if (payload.method === 'eth_chainId') {
+            return {"jsonrpc":"2.0","id":1,"result":"0x5"}; // Example chain ID in hex format
+          }
+        }
+      }
+
+      // @ts-ignore
+      const chainId = await getNetworkChainId('goerliNoChainId', this.hre, MockHttpProvider);
+      expect(chainId).to.equal(5);
     });
   });
 
