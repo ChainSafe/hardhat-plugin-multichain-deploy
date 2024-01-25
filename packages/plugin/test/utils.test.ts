@@ -4,8 +4,8 @@ import chaiAsPromised from "chai-as-promised";
 
 import { useEnvironment } from "./helpers";
 import {Environment} from "@buildwithsygma/sygma-sdk-core";
-import {getConfigEnvironmentVariable, getNetworkChainId} from "../src/utils";
-import sinon from "sinon";
+import {getConfigEnvironmentVariable, getNetworkChainId, sumedFees} from "../src/utils";
+import {createMockHttpProvider} from "./MockHttpProvider";
 
 use(chaiAsPromised);
 
@@ -23,42 +23,35 @@ describe("Unit tests for utils", function () {
 
   describe("getNetworkChainId", function () {
     useEnvironment("hardhat-project");
-    let sandbox: sinon.SinonSandbox;
 
-    beforeEach(function () {
-      sandbox = sinon.createSandbox();
-    });
-
-    afterEach(function () {
-      sandbox.restore();
-    });
-
-
-    it("should work", async function () {
-      const chainID = await getNetworkChainId("goerli", this.hre);
-
-      console.log(chainID);
-    });
-
-    it('should fetch the chain ID using a mocked HttpProviderClass', async function () {
-      class MockHttpProvider {
-        // @ts-ignore
-        constructor(clientUrl, httpProviderOptions) {}
-
-        // @ts-ignore
-        async request(payload, requestOptions) {
-          console.log("MockHttpProvider", payload, requestOptions);
-
-          if (payload.method === 'eth_chainId') {
-            return {"jsonrpc":"2.0","id":1,"result":"0x5"}; // Example chain ID in hex format
-          }
-        }
-      }
-
-      // @ts-ignore
-      const chainId = await getNetworkChainId('goerliNoChainId', this.hre, MockHttpProvider);
+    it("Retrieve chainID from config", async function () {
+      const chainId = await getNetworkChainId("goerli", this.hre);
       expect(chainId).to.equal(5);
     });
+
+    it('Retrieve chainID from node if is not available in config', async function () {
+      const chainId = await getNetworkChainId('goerliNoChainId', this.hre, createMockHttpProvider());
+      expect(chainId).to.equal(5);
+    });
+  });
+
+  describe("sumedFees", function () {
+    it("Sum's all available types and return current result", function () {
+      const sum = sumedFees([4, BigInt(3), '2', '0x1']);
+      expect(sum).to.equal('10');
+    });
+
+    [
+      { type: 'Number', values: [5, 5, 5] },
+      { type: 'Bigint', values: [BigInt(5), BigInt(5), BigInt(5)] },
+      { type: 'String', values: ['5', '5', '5'] },
+      { type: 'HexString', values: ['0x5', '0x5', '0x5'] },
+    ].forEach(({ type, values}) => {
+      it(`Sum's values of type ${type} and return current value`, function () {
+        const sum = sumedFees(values);
+        expect(sum).to.equal('15');
+      });
+    })
   });
 
   describe("mapNetworkArgs", function () {
