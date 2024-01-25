@@ -25,7 +25,7 @@ export function getConfigEnvironmentVariable(
 export async function getNetworkChainId(
   network: string,
   hre: HardhatRuntimeEnvironment,
-  HttpProviderClass = HttpProvider,
+  HttpProviderClass = HttpProvider
 ): Promise<number> {
   const networkConfig = hre.config.networks[network];
   let chainID = networkConfig.chainId;
