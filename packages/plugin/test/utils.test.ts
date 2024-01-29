@@ -9,9 +9,11 @@ import {
   encodeInitData,
   getConfigEnvironmentVariable,
   getNetworkChainId,
+  mapNetworkArgs,
   sumedFees,
 } from "../src/utils";
-import { createMockHttpProvider } from "./MockHttpProvider";
+import { NetworkArguments } from "../src/types";
+import { createMockHttpProvider, mockDomains } from "./mocks";
 import { useEnvironment } from "./helpers";
 
 use(chaiAsPromised);
@@ -66,7 +68,6 @@ describe("Unit tests for utils", function () {
   });
 
   describe("encodeInitData", function () {
-    useEnvironment("hardhat-project");
     const { abi } = helloSygmaContract;
 
     it("Return current encoded data for specified method", function () {
@@ -87,22 +88,114 @@ describe("Unit tests for utils", function () {
   });
 
   describe("mapNetworkArgs", function () {
-    useEnvironment("hardhat-project");
+    const { abi } = helloSygmaContract;
 
-    it("does works?", function () {
-      assert.deepEqual({}, {});
+    it("Return current encoded data, without init data", function () {
+      const networkArgs: NetworkArguments<typeof abi> = {
+        goerli: { args: [5] },
+        holesky: { args: [5] },
+      };
+
+      assert.deepEqual(mapNetworkArgs(abi, networkArgs, mockDomains), {
+        deployDomainIDs: [BigInt(1), BigInt(6)],
+        constructorArgs: [
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+        ],
+        initDatas: [new Uint8Array(), new Uint8Array()],
+      });
     });
 
-    it("does works?", function () {
-      assert.deepEqual({}, {});
+    it("Return current encoded data, with init data", function () {
+      const networkArgs: NetworkArguments<typeof abi> = {
+        goerli: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["chain"] },
+        },
+        holesky: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["safe"] },
+        },
+      };
+
+      assert.deepEqual(mapNetworkArgs(abi, networkArgs, mockDomains), {
+        deployDomainIDs: [BigInt(1), BigInt(6)],
+        constructorArgs: [
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+        ],
+        initDatas: [
+          "0xc47f002700000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000005636861696e000000000000000000000000000000000000000000000000000000",
+          "0xc47f0027000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000047361666500000000000000000000000000000000000000000000000000000000",
+        ],
+      });
     });
 
-    it("should fail?", function () {
-      assert.throw(() => {}, Error, "text");
+    it("Return current encoded data, with mixed init data", function () {
+      const networkArgs: NetworkArguments<typeof abi> = {
+        goerli: { args: [5] },
+        holesky: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["safe"] },
+        },
+      };
+
+      assert.deepEqual(mapNetworkArgs(abi, networkArgs, mockDomains), {
+        deployDomainIDs: [BigInt(1), BigInt(6)],
+        constructorArgs: [
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+          "0x0000000000000000000000000000000000000000000000000000000000000005",
+        ],
+        initDatas: [
+          new Uint8Array(),
+          "0xc47f0027000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000047361666500000000000000000000000000000000000000000000000000000000",
+        ],
+      });
     });
 
-    it("should fail?", function () {
-      assert.throw(() => {}, Error, "text");
+    it("Should fail on missing domain", function () {
+      const networkArgs: NetworkArguments<typeof abi> = {
+        sepolia: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["chain"] },
+        },
+        goreli: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["safe"] },
+        },
+      };
+
+      assert.throw(
+        () => {
+          mapNetworkArgs(abi, networkArgs, mockDomains);
+        },
+        HardhatPluginError,
+        "Unavailable Networks in networkArgs"
+      );
+    });
+
+    it("Should fail on missing wrong initMethodName", function () {
+      const networkArgs: NetworkArguments<typeof abi> = {
+        sepolia: {
+          args: [5],
+          initData: {
+            initMethodName: "setLevel" as any /* Hack to bypass type-check */,
+            initMethodArgs: ["22"],
+          },
+        },
+        goreli: {
+          args: [5],
+          initData: { initMethodName: "setName", initMethodArgs: ["safe"] },
+        },
+      };
+
+      assert.throw(
+        () => {
+          mapNetworkArgs(abi, networkArgs, mockDomains);
+        },
+        HardhatPluginError,
+        "InitMethod setLevel not foud in ABI"
+      );
     });
   });
 });
