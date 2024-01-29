@@ -2,6 +2,7 @@ import assert from "assert";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
+  AbiFallbackFragment,
   Bytes,
   ContractAbi,
   FMT_BYTES,
@@ -47,6 +48,23 @@ export function sumedFees(fees: Numbers[]): string {
     0
   );
   return sumOfFees.toString();
+}
+
+export function encodeInitData<Abi extends ContractAbi>(
+  abi: Abi,
+  initMethodName: string,
+  initMethodArgs: unknown[]
+): Bytes {
+  const initMethodAbiFragment = (
+    abi as unknown as Array<AbiFallbackFragment>
+  ).find((fragment) => fragment.name === initMethodName);
+  if (!initMethodAbiFragment)
+    throw new HardhatPluginError(
+      "@chainsafe/hardhat-plugin-multichain-deploy",
+      `InitMethod ${initMethodName} not foud in ABI`
+    );
+
+  return eth.abi.encodeFunctionCall(initMethodAbiFragment, initMethodArgs);
 }
 
 export function mapNetworkArgs<Abi extends ContractAbi = any>(
@@ -106,10 +124,16 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       //no constructorAbi and no args
       constructorArgs.push("0x");
     }
+    const networkInitData = networkArgs[networkName].initData;
+    if (networkInitData !== undefined) {
+      const { initMethodName, initMethodArgs } = networkInitData;
+      const initData = encodeInitData(
+        contractAbi,
+        initMethodName,
+        initMethodArgs
+      );
 
-    //pushes encoded initData if provided
-    if (networkArgs[networkName].initData) {
-      initDatas.push(networkArgs[networkName].initData as Bytes);
+      initDatas.push(initData);
     } else {
       initDatas.push(hexToBytes("0x"));
     }
