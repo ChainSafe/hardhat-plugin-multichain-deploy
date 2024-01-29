@@ -24,13 +24,14 @@ export function getConfigEnvironmentVariable(
 
 export async function getNetworkChainId(
   network: string,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
+  HttpProviderClass = HttpProvider
 ): Promise<number> {
   const networkConfig = hre.config.networks[network];
   let chainID = networkConfig.chainId;
   if (!chainID) {
     assert("httpHeaders" in networkConfig);
-    const httpProvider = new HttpProvider(networkConfig.url, {
+    const httpProvider = new HttpProviderClass(networkConfig.url, {
       providerOptions: { headers: networkConfig.httpHeaders },
     });
     const web3 = new Web3(httpProvider);
