@@ -1,6 +1,10 @@
 import assert from "assert";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
+import {
+  Domain,
+  Environment,
+  getTransferStatusData,
+} from "@buildwithsygma/sygma-sdk-core";
 import {
   AbiFallbackFragment,
   Bytes,
@@ -149,4 +153,30 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     constructorArgs,
     initDatas,
   };
+}
+
+export function transferStatusInterval(
+  environment: Environment,
+  txHash: string,
+  domainID: number
+): string {
+  let controller: AbortController;
+  let explorerUrl: string = "";
+
+  const interval = setInterval(() => {
+    controller = new AbortController();
+    void getTransferStatusData(environment, txHash, domainID.toString()).then(
+      (transferStatus) => {
+        explorerUrl = transferStatus.explorerUrl;
+
+        if (transferStatus.status === "executed") {
+          clearInterval(interval);
+          controller.abort();
+          return;
+        }
+      }
+    );
+  }, 1000) as unknown as number;
+
+  return explorerUrl;
 }
