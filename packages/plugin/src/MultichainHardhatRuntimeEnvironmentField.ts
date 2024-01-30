@@ -7,6 +7,8 @@ import Web3, {
   PayableCallOptions,
 } from "web3";
 import { vars } from "hardhat/config";
+import chalk from "chalk";
+import terminalLink from "terminal-link";
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
@@ -138,10 +140,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
         fees
       )
       .send(payableTxOptions);
-
-    const { from, to, transactionHash } = receipt;
+    const networkNames = Object.keys(networkArgs);
+    const { transactionHash } = receipt;
     console.log(
-      `Transacion sent from ${from} to ${to}, transaction hash: ${transactionHash}`
+      `Multichain deployment initiated, transaction hash: ${chalk.bold(
+        transactionHash
+      )}
+      
+      ` +
+        "\n" +
+        "Destinaton networks:" +
+        networkNames.join("\r\n")
     );
 
     const [deployer] = await this.web3.eth.getAccounts();
@@ -152,8 +161,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
       )!;
       return deployDomain.chainId;
     });
-
-    const networkNames = Object.keys(networkArgs);
 
     const deploymentInfo: DeploymentInfo[] = await Promise.all(
       destinationDomainChainIDs.map(async (domainChainID, index) => {
@@ -168,15 +175,22 @@ export class MultichainHardhatRuntimeEnvironmentField {
           )
           .call();
         console.log(
-          `Contract address for ${network.toUpperCase()}: ${contractAddress}`
+          `Contract deployed on ${chalk.bold(
+            network.toUpperCase()
+          )}: ${chalk.bold(contractAddress)}`
         );
 
-        const explorerUrl = transferStatusInterval(
+        const explorerUrl = await transferStatusInterval(
           this.hre.config.multichain.environment,
           transactionHash,
           domainChainID
         );
-        console.log(`Bridge transfer executed, explorer url: ${explorerUrl}`);
+        const explorerLink = terminalLink(explorerUrl, explorerUrl);
+        console.log(
+          `Bridge transfer executed. More details: ${chalk.underline(
+            explorerLink
+          )}`
+        );
 
         return {
           network,

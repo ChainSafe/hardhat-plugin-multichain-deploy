@@ -155,28 +155,35 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   };
 }
 
-export function transferStatusInterval(
+export async function transferStatusInterval(
   environment: Environment,
   txHash: string,
   domainID: number
-): string {
-  let controller: AbortController;
+): Promise<string> {
   let explorerUrl: string = "";
 
-  const interval = setInterval(() => {
-    controller = new AbortController();
-    void getTransferStatusData(environment, txHash, domainID.toString()).then(
-      (transferStatus) => {
-        explorerUrl = transferStatus.explorerUrl;
+  await new Promise((resolve) => {
+    let controller: AbortController;
+    setInterval(() => {
+      controller = new AbortController();
+      void getTransferStatusData(environment, txHash, domainID.toString()).then(
+        (transferStatus) => {
+          explorerUrl = transferStatus.explorerUrl;
 
-        if (transferStatus.status === "executed") {
-          clearInterval(interval);
-          controller.abort();
-          return;
+          if (transferStatus.status === "executed") {
+            controller.abort();
+            resolve(explorerUrl);
+          }
+          if (transferStatus.status === "failed") {
+            throw new HardhatPluginError(
+              "@chainsafe/hardhat-plugin-multichain-deploy",
+              `Bridge transfer failed`
+            );
+          }
         }
-      }
-    );
-  }, 1000) as unknown as number;
+      );
+    }, 1000);
+  });
 
   return explorerUrl;
 }
