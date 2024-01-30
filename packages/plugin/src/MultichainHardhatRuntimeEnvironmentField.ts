@@ -175,7 +175,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
           )
           .call();
         console.log(
-          `Contract deployed on ${chalk.bold(
+          `Contract deploying on ${chalk.bold(
             network.toUpperCase()
           )}: ${chalk.bold(contractAddress)}`
         );
