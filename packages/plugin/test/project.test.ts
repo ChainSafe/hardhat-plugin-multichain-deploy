@@ -1,11 +1,11 @@
-import 'mocha'
-import {assert, expect, use} from "chai";
+import "mocha";
+import { assert, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 
+import { Environment } from "@buildwithsygma/sygma-sdk-core";
 import { MultichainHardhatRuntimeEnvironmentField } from "../src/MultichainHardhatRuntimeEnvironmentField";
 
 import { useEnvironment } from "./helpers";
-import {Environment} from "@buildwithsygma/sygma-sdk-core";
 
 use(chaiAsPromised);
 
@@ -34,6 +34,5 @@ describe("Integration tests examples", function () {
 
   describe("Hardhat Runtime Environment extension", function () {
     useEnvironment("hardhat-project");
-
   });
 });
