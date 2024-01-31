@@ -10,14 +10,14 @@ import { vars } from "hardhat/config";
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
-  mapNetworkArgs,
   sumedFees,
+  mapNetworkArgs,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
 import { DeployOptions, NetworkArguments } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
-  private isValidated: boolean = false;
+  private isInitiated: boolean = false;
   private domains: Domain[] = [];
   private readonly web3: Web3 | null;
 
@@ -34,7 +34,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
   //current Sygma hardcoded gasLimit
   private gasLimit = 1000000;
 
-  private async validateConfig(): Promise<void> {
+  private async initConfig(): Promise<void> {
     const originChainId = await getNetworkChainId(
       this.hre.network.name,
       this.hre
@@ -46,7 +46,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     this.domains = config.getDomains();
 
-    this.isValidated;
+    this.isInitiated;
   }
 
   /**
@@ -79,7 +79,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     networkArgs: NetworkArguments<Abi>,
     options?: DeployOptions
   ): Promise<Transaction | void> {
-    if (!this.isValidated) await this.validateConfig();
+    if (!this.isInitiated) await this.initConfig();
     if (!this.web3) return;
 
     //optional params
