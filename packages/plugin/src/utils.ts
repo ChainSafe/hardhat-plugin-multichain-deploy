@@ -1,7 +1,12 @@
 import assert from "assert";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
 import {
+  Domain,
+  Environment,
+  getTransferStatusData,
+} from "@buildwithsygma/sygma-sdk-core";
+import {
+  AbiFallbackFragment,
   Bytes,
   ContractAbi,
   FMT_BYTES,
@@ -23,13 +28,14 @@ export function getConfigEnvironmentVariable(
 
 export async function getNetworkChainId(
   network: string,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
+  HttpProviderClass = HttpProvider
 ): Promise<number> {
   const networkConfig = hre.config.networks[network];
   let chainID = networkConfig.chainId;
   if (!chainID) {
     assert("httpHeaders" in networkConfig);
-    const httpProvider = new HttpProvider(networkConfig.url, {
+    const httpProvider = new HttpProviderClass(networkConfig.url, {
       providerOptions: { headers: networkConfig.httpHeaders },
     });
     const web3 = new Web3(httpProvider);
@@ -47,6 +53,23 @@ export function sumedFees(fees: Numbers[]): string {
     0
   );
   return sumOfFees.toString();
+}
+
+export function encodeInitData<Abi extends ContractAbi>(
+  abi: Abi,
+  initMethodName: string,
+  initMethodArgs: unknown[]
+): Bytes {
+  const initMethodAbiFragment = (
+    abi as unknown as Array<AbiFallbackFragment>
+  ).find((fragment) => fragment.name === initMethodName);
+  if (!initMethodAbiFragment)
+    throw new HardhatPluginError(
+      "@chainsafe/hardhat-plugin-multichain-deploy",
+      `InitMethod ${initMethodName} not foud in ABI`
+    );
+
+  return eth.abi.encodeFunctionCall(initMethodAbiFragment, initMethodArgs);
 }
 
 export function mapNetworkArgs<Abi extends ContractAbi = any>(
@@ -72,12 +95,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     else {
       throw new HardhatPluginError(
         "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.
-        Available networks: ${domains
-          .map((domain): string => `${domain.name}`)
-          .join(", ")
-          .replace(/, ([^,]*)$/, "")}\n
-        `
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
       );
     }
 
@@ -111,9 +129,16 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
       //no constructorAbi and no args
       constructorArgs.push("0x");
     }
+    const networkInitData = networkArgs[networkName].initData;
+    if (networkInitData !== undefined) {
+      const { initMethodName, initMethodArgs } = networkInitData;
+      const initData = encodeInitData(
+        contractAbi,
+        initMethodName,
+        initMethodArgs
+      );
 
-    if (networkArgs[networkName].initData) {
-      initDatas.push(networkArgs[networkName].initData as Bytes);
+      initDatas.push(initData);
     } else {
       initDatas.push(hexToBytes("0x"));
     }
@@ -124,4 +149,37 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     constructorArgs,
     initDatas,
   };
+}
+
+export async function transferStatusInterval(
+  environment: Environment,
+  txHash: string,
+  domainID: number
+): Promise<string> {
+  let explorerUrl: string = "";
+
+  await new Promise((resolve) => {
+    let controller: AbortController;
+    setInterval(() => {
+      controller = new AbortController();
+      void getTransferStatusData(environment, txHash, domainID.toString()).then(
+        (transferStatus) => {
+          explorerUrl = transferStatus.explorerUrl;
+
+          if (transferStatus.status === "executed") {
+            controller.abort();
+            resolve(explorerUrl);
+          }
+          if (transferStatus.status === "failed") {
+            throw new HardhatPluginError(
+              "@chainsafe/hardhat-plugin-multichain-deploy",
+              `Bridge transfer failed`
+            );
+          }
+        }
+      );
+    }, 1000);
+  });
+
+  return explorerUrl;
 }
