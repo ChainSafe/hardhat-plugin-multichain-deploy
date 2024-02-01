@@ -1,39 +1,45 @@
 # NetworkArguments
 
-NetworkArguments define the configuration for deploying smart contracts across various blockchain networks. This structure allows for specifying different deployment settings for each network, enabling more granular control over the deployment process.
+NetworkArguments define the configuration for deploying smart contracts across various blockchain networks. This setup allows for specifying different deployment settings for each network, providing detailed control over the deployment process.
 
 ## Interface
 
-```ts
+```typescript
 interface NetworkArguments<Abi extends ContractAbi = any> {
   [network: string]: NetworkArgument<Abi>;
 }
 
 interface NetworkArgument<Abi extends ContractAbi = any> {
   args: ContractConstructorArgs<Abi>;
-  initData?: string;
+  initData?: {
+    initMethodName: keyof ContractMethods<Abi>;
+    initMethodArgs: unknown[];
+  };
 }
 ```
 
 ## Usages
 
 ### NetworkArguments
-- **Description**: A collection mapping network names from `hardhat.config.ts` to their respective `NetworkArgument`. Only the networks intended for deployment need to be specified.
-- **Purpose**: Facilitates the deployment of contracts to selected networks with customized settings.
+- **Description**: Maps network names from `hardhat.config.ts` to their respective `NetworkArgument`, allowing for network-specific deployment configurations.
+- **Purpose**: Facilitates contract deployment across selected networks with customized settings.
 
 ### NetworkArgument
 - **args**
-  - **Description**: The arguments passed to the contract's constructor for the specified network.
-  - **Purpose**: Used to initialize and configure the contract upon deployment for each specific network.
+  - **Description**: Constructor arguments for the contract on each specified network.
+  - **Purpose**: Used for initializing the contract upon deployment.
+
 - **initData**
-  - **TODO!!**
-  - **Description**: An optional string for additional initialization data (often a hexadecimal string).
-  - **Purpose**: Enables providing extra setup or configuration data, usually used in conjunction with the contract's initialization method.
+  - **Description**: An optional object that specifies additional initialization to be performed after the contract's deployment. When used, it must include both `initMethodName` and `initMethodArgs`.
+  - **initMethodName**
+    - **Description**: Specifies the contract method to call for further initialization.
+  - **initMethodArgs**
+    - **Description**: An array of values that correspond to the parameters required by the method named in `initMethodName`. These arguments are passed directly to the initialization method call.
 
 ## Example
 
 ### Example `hardhat.config.ts`
-```ts
+```typescript
 const config: HardhatUserConfig = {
   networks: {
     sepolia: { ... },
@@ -46,17 +52,25 @@ const config: HardhatUserConfig = {
 ```
 
 ### Example Usage with Above Config
-```ts
+```typescript
 const abi = [ ... ] as const;
 
 const networks: NetworkArguments<typeof abi> = {
   sepolia: {
     args: [18, "zToken"],
+    initData: {
+      initMethodName: "setName",
+      initMethodArgs: ["SuperToken"],
+    }
   },
   goerli: {
-    args: [18, "zToken"]
+    args: [18, "zToken"],
+    initData: {
+      initMethodName: "setName",
+      initMethodArgs: ["GummyToken"],
+    }
   },
 };
 ```
 
-This example demonstrates how to define `NetworkArguments` for deploying a contract with specific constructor arguments on the Sepolia and Goerli test networks.
+This example shows how `NetworkArguments` can be used to deploy a contract with specific constructor arguments on the Sepolia and Goerli test networks. It includes optional post-deployment initialization to set unique token names for each network through the `setName` method.
