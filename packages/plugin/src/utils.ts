@@ -95,12 +95,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     else {
       throw new HardhatPluginError(
         "@chainsafe/hardhat-plugin-multichain-deploy",
-        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.
-        Available networks: ${domains
-          .map((domain): string => `${domain.name}`)
-          .join(", ")
-          .replace(/, ([^,]*)$/, "")}\n
-        `
+        `Unavailable Networks in networkArgs: The following network ${networkName} is not supported as destination network.`
       );
     }
 
