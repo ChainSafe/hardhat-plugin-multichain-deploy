@@ -30,3 +30,10 @@ export interface DeployOptions {
   isUniquePerChain?: boolean;
   customNonPayableTxOptions?: NonPayableCallOptions;
 }
+
+export interface DeploymentInfo {
+  network: string;
+  contractAddress: string;
+  explorerUrl: string;
+  transactionHash: string;
+}

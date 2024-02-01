@@ -11,10 +11,11 @@ import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
   sumedFees,
+  transferStatusInterval,
   mapNetworkArgs,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
-import { DeployOptions, NetworkArguments } from "./types";
+import { DeployOptions, DeploymentInfo, NetworkArguments } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isInitiated: boolean = false;
@@ -62,7 +63,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
     contractName: string,
     networkArgs: NetworkArguments<Abi>,
     options?: DeployOptions
-  ): Promise<Transaction | void> {
+  ): Promise<{
+    deploymentInfo: DeploymentInfo[];
+    receipt: Transaction;
+  } | void> {
     const artifact = this.hre.artifacts.readArtifactSync(contractName);
 
     return this.deployMultichainBytecode(
@@ -78,7 +82,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
     contractAbi: Abi,
     networkArgs: NetworkArguments<Abi>,
     options?: DeployOptions
-  ): Promise<Transaction | void> {
+  ): Promise<{
+    deploymentInfo: DeploymentInfo[];
+    receipt: Transaction;
+  } | void> {
     if (!this.isInitiated) await this.initConfig();
     if (!this.web3) return;
 
@@ -118,8 +125,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
         value: sumedFees(fees),
       };
     }
-
-    return adapterContract.methods
+    console.log("Sending transaction...");
+    const receipt = await adapterContract.methods
       .deploy(
         contractBytecode,
         this.gasLimit,
@@ -131,5 +138,62 @@ export class MultichainHardhatRuntimeEnvironmentField {
         fees
       )
       .send(payableTxOptions);
+    const networkNames = Object.keys(networkArgs);
+    const { transactionHash } = receipt;
+    console.log(
+      `Multichain deployment initiated, transaction hash: ${transactionHash}
+      
+      ` +
+        "\n" +
+        "Destinaton networks:" +
+        networkNames.join("\r\n")
+    );
+
+    const [deployer] = await this.web3.eth.getAccounts();
+
+    const destinationDomainChainIDs = deployDomainIDs.map((deployDomainID) => {
+      const deployDomain: Domain = this.domains.find(
+        (domain) => BigInt(domain.id) === deployDomainID
+      )!;
+      return deployDomain.chainId;
+    });
+
+    const deploymentInfo: DeploymentInfo[] = await Promise.all(
+      destinationDomainChainIDs.map(async (domainChainID, index) => {
+        const network = networkNames[index];
+
+        const contractAddress = await adapterContract.methods
+          .computeContractAddressForChain(
+            deployer,
+            salt,
+            isUniquePerChain,
+            domainChainID
+          )
+          .call();
+        console.log(
+          `Contract deploying on ${network.toUpperCase()}: ${contractAddress}`
+        );
+
+        const explorerUrl = await transferStatusInterval(
+          this.hre.config.multichain.environment,
+          transactionHash,
+          domainChainID
+        );
+
+        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
+
+        return {
+          network,
+          contractAddress,
+          explorerUrl,
+          transactionHash,
+        };
+      })
+    );
+
+    return {
+      receipt,
+      deploymentInfo,
+    };
   }
 }

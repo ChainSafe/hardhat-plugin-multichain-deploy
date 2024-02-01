@@ -1,6 +1,10 @@
 import assert from "assert";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Domain, Environment } from "@buildwithsygma/sygma-sdk-core";
+import {
+  Domain,
+  Environment,
+  getTransferStatusData,
+} from "@buildwithsygma/sygma-sdk-core";
 import {
   AbiFallbackFragment,
   Bytes,
@@ -145,4 +149,37 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
     constructorArgs,
     initDatas,
   };
+}
+
+export async function transferStatusInterval(
+  environment: Environment,
+  txHash: string,
+  domainID: number
+): Promise<string> {
+  let explorerUrl: string = "";
+
+  await new Promise((resolve) => {
+    let controller: AbortController;
+    setInterval(() => {
+      controller = new AbortController();
+      void getTransferStatusData(environment, txHash, domainID.toString()).then(
+        (transferStatus) => {
+          explorerUrl = transferStatus.explorerUrl;
+
+          if (transferStatus.status === "executed") {
+            controller.abort();
+            resolve(explorerUrl);
+          }
+          if (transferStatus.status === "failed") {
+            throw new HardhatPluginError(
+              "@chainsafe/hardhat-plugin-multichain-deploy",
+              `Bridge transfer failed`
+            );
+          }
+        }
+      );
+    }, 1000);
+  });
+
+  return explorerUrl;
 }
