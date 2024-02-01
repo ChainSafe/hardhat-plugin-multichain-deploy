@@ -7,8 +7,6 @@ import Web3, {
   PayableCallOptions,
 } from "web3";
 import { vars } from "hardhat/config";
-import chalk from "chalk";
-import terminalLink from "terminal-link";
 import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
@@ -143,9 +141,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const networkNames = Object.keys(networkArgs);
     const { transactionHash } = receipt;
     console.log(
-      `Multichain deployment initiated, transaction hash: ${chalk.bold(
-        transactionHash
-      )}
+      `Multichain deployment initiated, transaction hash: ${transactionHash}
       
       ` +
         "\n" +
@@ -175,9 +171,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
           )
           .call();
         console.log(
-          `Contract deploying on ${chalk.bold(
-            network.toUpperCase()
-          )}: ${chalk.bold(contractAddress)}`
+          `Contract deploying on ${network.toUpperCase()}: ${contractAddress}`
         );
 
         const explorerUrl = await transferStatusInterval(
@@ -185,12 +179,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
           transactionHash,
           domainChainID
         );
-        const explorerLink = terminalLink(explorerUrl, explorerUrl);
-        console.log(
-          `Bridge transfer executed. More details: ${chalk.underline(
-            explorerLink
-          )}`
-        );
+
+        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
 
         return {
           network,
