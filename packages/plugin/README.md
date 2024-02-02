@@ -4,11 +4,10 @@ Experience the seamless integration of Hardhat with Sygma: the ultimate plugin f
 Embrace the power of Sygma protocol, and transform your deployment process into a streamlined, efficient, and multi-chain adventure.  
 With this tool, you're not just deploying contracts; you're unlocking new horizons in the blockchain ecosystem.
 
-
 ## Installation
 
 ```bash
-npm install --save-dev @chainsafe/hardhat-plugin-multichain-deploy
+npm install --save-dev @chainsafe/hardhat-plugin-multichain-deploy @buildwithsygma/sygma-sdk-core
 ```
 
 Import the plugin in your `hardhat.config.js``:
@@ -33,14 +32,20 @@ async deployMultichain<Abi extends ContractAbi = any>(
         contractName: string,
         networkArgs: NetworkArguments<Abi>,
         options?: DeployOptions
-): Promise<Transaction | void>
+): Promise<{
+   deploymentInfo: DeploymentInfo[];
+   receipt: Transaction;
+} | void>
 
 async deployMultichainBytecode<Abi extends ContractAbi = any>(
         contractBytecode: string,
         contractAbi: Abi,
         networkArgs: NetworkArguments<Abi>,
         options?: DeployOptions
-): Promise<Transaction | void> {
+): Promise<{
+   deploymentInfo: DeploymentInfo[];
+   receipt: Transaction;
+} | void>
 ```
 
  * `contractName`: The name of the contract to be deployed.
@@ -49,9 +54,13 @@ async deployMultichainBytecode<Abi extends ContractAbi = any>(
  * `networkArgs`: An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See [NetworkArguments.md](../../docs/plugin/NetworkArguments.md)
  * `options`: Optional settings for the deployment process. These can include various configurations specific to the deployment. See [DeployOptions.md](../../docs/plugin/DeployOptions.md)
 
+## Environment variable
+
+ - `ADAPTER_ADDRESS` - address of adapter (adapter is used to propagate all deployment on other chains with help of sygma). It can be used in case if you deploy own adapters
+
 ## Configuration
 
-The Hardhat Plugin Multichain Deployment plugin requires specific configurations for successful multi-chain deployment.
+The Hardhat Plugin Multichain Deployment plugin requires specific configurations for successful multichain deployment.
 
 This plugin extends introduce new name space called `multichain` with options:
  * `environment`: Specifies the Sygma environment for deployment.
@@ -79,18 +88,24 @@ const config: HardhatUserConfig = {
 
 ## Usages
 
-### TODO
+With the setup complete, let’s deploy an ERC20 contract across multiple chains:
 
-After familiarizing yourself with the capabilities, let's see how everything works together.  
-
-Example scenario: You've created an ERC20 contract and want to deploy it across multiple chains using the configuration mentioned above.
 ```typescript
-// Deploy the contract
-const tx = await hre.multichain.deployMultichain('MySuperToken', [name, symbol, decimals], { singer: web3signer });
+const networkArgs = {
+   sepolia: {
+     args: [name, symbol, decimals],
+   },
+   goerli: {
+      args: [name, symbol, decimals],
+   },
+};
+const options = {
+   salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
+};
 
-console.log("Transaction Hash: ", tx);
+this.hre.multichain.deployMultichain("MySuperToken", networkArgs, options);
 ```
 
 ## Contribution
 
-For contributing to the project, please refer to the [root readme](../../README.md) file.
+For contributing to the project, please refer to the [monorepo readme](../../README.md) file.
