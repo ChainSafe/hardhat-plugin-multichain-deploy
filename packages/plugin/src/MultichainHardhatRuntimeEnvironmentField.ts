@@ -36,6 +36,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     "ADAPTER_ADDRESS",
     "0x85d62ad850b322152bf4ad9147bfbf097da42217"
   );
+  public LOCAL_ADAPTER_ADDRESS = "";
 
   //current Sygma hardcoded gasLimit
   private gasLimit = 1000000;
@@ -53,10 +54,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.domains = config.getDomains();
 
     this.isInitiated;
-    this.ADAPTER_ADDRESS = vars.get(
-      "ADAPTER_ADDRESS",
-      "0x85d62ad850b322152bf4ad9147bfbf097da42217"
-    );
   }
 
   public async initLocalEnvironment(): Promise<void> {
@@ -86,7 +83,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const adapterAddress = receipt.events!.ContractCreation.returnValues
       .newContract as string;
 
-    this.ADAPTER_ADDRESS = adapterAddress;
+    this.LOCAL_ADAPTER_ADDRESS = adapterAddress;
 
     console.log(
       `Adapter locally deployed: ${adapterAddress}` +
