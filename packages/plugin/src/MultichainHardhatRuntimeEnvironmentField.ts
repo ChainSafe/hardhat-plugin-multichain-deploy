@@ -14,13 +14,18 @@ import {
   transferStatusInterval,
   mapNetworkArgs,
 } from "./utils";
-import { AdapterABI } from "./adapterABI";
+import {
+  AdapterABI,
+  AdapterBytecode,
+  CreateXABI,
+  CreateXBytecode,
+} from "./adapterABI";
 import { DeployOptions, DeploymentInfo, NetworkArguments } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isInitiated: boolean = false;
   private domains: Domain[] = [];
-  private readonly web3: Web3 | null;
+  private readonly web3: Web3;
 
   public constructor(private readonly hre: HardhatRuntimeEnvironment) {
     const provider = this.hre.network.provider;
@@ -48,6 +53,46 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.domains = config.getDomains();
 
     this.isInitiated;
+    this.ADAPTER_ADDRESS = vars.get(
+      "ADAPTER_ADDRESS",
+      "0x85d62ad850b322152bf4ad9147bfbf097da42217"
+    );
+  }
+
+  public async initLocalEnvironment(): Promise<void> {
+    const [deployer] = await this.web3.eth.getAccounts();
+
+    const gasMultiplier = this.hre.network.name.includes("arbi") ? 10 : 1;
+    const txOptionsAdapter = { gasLimit: 1900000 * gasMultiplier };
+    const txOptionsCreateX = { gasLimit: 2700000 * gasMultiplier };
+
+    const createX = new this.web3.eth.Contract(CreateXABI);
+    const response = await createX
+      .deploy({
+        data: CreateXBytecode,
+      })
+      .send({ from: deployer, ...txOptionsCreateX });
+    console.log(`CreateX locally deployed: ${response.options.address!}`);
+
+    const deployerSalt = this.web3.utils.encodePacked(
+      ["bytes", "bytes", "bytes"],
+      [deployer, "0x00", "0x0000000000000000000000"]
+    );
+
+    const receipt = await createX.methods
+      .deployCreate3(deployerSalt, AdapterBytecode)
+      .send({ from: deployer, ...txOptionsAdapter });
+
+    const adapterAddress = receipt.events!.ContractCreation.returnValues
+      .newContract as string;
+
+    this.ADAPTER_ADDRESS = adapterAddress;
+
+    console.log(
+      `Adapter locally deployed: ${adapterAddress}` +
+        "\n" +
+        "Local environment initiated"
+    );
   }
 
   /**
@@ -80,7 +125,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
   ): Promise<{
     deploymentInfo: DeploymentInfo[];
     receipt: Transaction;
-  } | void> {
+  }> {
     const artifact = this.hre.artifacts.readArtifactSync(contractName);
 
     return this.deployMultichainBytecode(
@@ -126,9 +171,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
   ): Promise<{
     deploymentInfo: DeploymentInfo[];
     receipt: Transaction;
-  } | void> {
+  }> {
     if (!this.isInitiated) await this.initConfig();
-    if (!this.web3) return;
 
     //optional params
     const salt = options?.salt ?? utils.randomBytes(32);
