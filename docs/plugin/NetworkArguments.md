@@ -21,8 +21,8 @@ interface NetworkArgument<Abi extends ContractAbi = any> {
 ## Usages
 
 ### NetworkArguments
-- **Description**: Maps network names from `hardhat.config.ts` to their respective `NetworkArgument`, allowing for network-specific deployment configurations.
-- **Purpose**: Facilitates contract deployment across selected networks with customized settings.
+  - **Description**: An object where each key is a network name registered on Sygma, mapped to their respective `NetworkArgument`. This structure facilitates network-specific deployment configurations, allowing for deployment across networks recognized by the Sygma protocol.
+  - **Purpose**: Enables the deployment of contracts to specified networks, leveraging the configurations tailored for each network as recognized by Sygma.
 
 ### NetworkArgument
 - **args**
@@ -38,20 +38,6 @@ interface NetworkArgument<Abi extends ContractAbi = any> {
 
 ## Example
 
-### Example `hardhat.config.ts`
-```typescript
-const config: HardhatUserConfig = {
-  networks: {
-    sepolia: { ... },
-    goerli: { ... }
-  },
-  multichain: {
-    environment: Environment.TESTNET,
-  },
-};
-```
-
-### Example Usage with Above Config
 ```typescript
 const abi = [ ... ] as const;
 
