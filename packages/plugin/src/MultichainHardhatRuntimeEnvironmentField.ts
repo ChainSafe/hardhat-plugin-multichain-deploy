@@ -62,7 +62,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * @returns A Promise resolving to a Transaction object.
    *
    * @example
-   * ```
    * const networkArgs = {
    *    sepolia: {
    *      args: [ 18, "token" ],
@@ -74,7 +73,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * };
    *
    * this.hre.multichain.deployMultichain("HelloContract", networkArgs, options);
-   * ```
    */
   public async deployMultichain<Abi extends ContractAbi = any>(
     contractName: string,
@@ -101,7 +99,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * @returns A Promise resolving to a Transaction object.
    *
    * @example
-   * ```
    * const contractBytecode = "0x60a060405234801561001057600080fd5b5060405161052b38038061052b83...";
    * const contractAbi = [{ ... }, { ... }];
    *
@@ -115,8 +112,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
    *    salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
    * };
    *
-   * this.hre.multichain.deployMultichain(contractBytecode, contractAbi, networkArgs, options);
-   * ```
+   * this.hre.multichain.deployMultichainBytecode(contractBytecode, contractAbi, networkArgs, options);
    */
   public async deployMultichainBytecode<Abi extends ContractAbi = any>(
     contractBytecode: string,
@@ -217,6 +213,19 @@ export class MultichainHardhatRuntimeEnvironmentField {
     };
   }
 
+  /**
+   * Fetches and logs the deployment information for a smart contract deployed across multiple blockchain networks.
+   * This function retrieves the status of a contract's deployment on each specified network domain using the transaction hash
+   * obtained from the `deployMultichain` or `deployMultichainBytecode` function.
+   *
+   * @param transactionHash The hash of the transaction returned by `deployMultichain` or `deployMultichainBytecode`.
+   * @param domainIDs An array of bigint values representing the domain IDs on which the contract was deployed. These IDs correspond
+   *                  to the blockchain networks registered on Sygma and should match the ones used during the deployment process.
+   *
+   * @example
+   * const { transactionHash, domainIDs } = await this.hre.multichain.deployMultichain("HelloContract", networkArgs);
+   * await getDeploymentInfo(transactionHash, domainIDs);
+   */
   public async getDeploymentInfo(transactionHash: string, domainIDs: bigint[]): Promise<void> {
     await Promise.all(
       domainIDs.map(async (domainId, index): Promise<void> => {
