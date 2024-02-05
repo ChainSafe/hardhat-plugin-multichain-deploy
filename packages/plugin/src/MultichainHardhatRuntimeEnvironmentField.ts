@@ -1,10 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Config, Domain } from "@buildwithsygma/sygma-sdk-core";
-import Web3, {
-  ContractAbi,
-  utils,
-  PayableCallOptions,
-} from "web3";
+import Web3, { ContractAbi, utils, PayableCallOptions } from "web3";
 import { vars } from "hardhat/config";
 import {
   getConfigEnvironmentVariable,
@@ -135,7 +131,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     const adapterContract = new this.web3.eth.Contract<typeof AdapterABI>(
       AdapterABI,
-      adapterAddress,
+      adapterAddress
     );
 
     const fees = await adapterContract.methods
@@ -226,9 +222,12 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * const { transactionHash, domainIDs } = await this.hre.multichain.deployMultichain("HelloContract", networkArgs);
    * await getDeploymentInfo(transactionHash, domainIDs);
    */
-  public async getDeploymentInfo(transactionHash: string, domainIDs: bigint[]): Promise<void> {
+  public async getDeploymentInfo(
+    transactionHash: string,
+    domainIDs: bigint[]
+  ): Promise<void> {
     await Promise.all(
-      domainIDs.map(async (domainId, index): Promise<void> => {
+      domainIDs.map(async (domainId): Promise<void> => {
         const explorerUrl = await transferStatusInterval(
           this.hre.config.multichain.environment,
           transactionHash,

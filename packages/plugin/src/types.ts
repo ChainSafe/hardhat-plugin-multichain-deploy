@@ -2,7 +2,8 @@ import {
   Address,
   ContractAbi,
   ContractConstructorArgs,
-  ContractMethods, HexString,
+  ContractMethods,
+  HexString,
   MatchPrimitiveType,
   NonPayableCallOptions,
 } from "web3";
