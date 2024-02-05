@@ -1,7 +1,8 @@
 import {
+  Address,
   ContractAbi,
   ContractConstructorArgs,
-  ContractMethods,
+  ContractMethods, HexString,
   MatchPrimitiveType,
   NonPayableCallOptions,
 } from "web3";
@@ -31,11 +32,10 @@ export interface DeployOptions {
   salt?: MatchPrimitiveType<"bytes32", unknown>;
   isUniquePerChain?: boolean;
   customNonPayableTxOptions?: NonPayableCallOptions;
+  adapterAddress?: Address;
 }
 
-export interface DeploymentInfo {
-  network: string;
-  contractAddress: string;
-  explorerUrl: string;
-  transactionHash: string;
+export interface DeployMultichainResponse {
+  domainIDs: bigint[];
+  transactionHash: HexString;
 }
