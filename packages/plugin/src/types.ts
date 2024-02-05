@@ -14,15 +14,17 @@ export type DeploymentNetwork =
   | "holesky"
   | string;
 
-export type NetworkArguments<Abi extends ContractAbi = any> = {
-  [network in DeploymentNetwork]: {
-    args: ContractConstructorArgs<Abi>;
-    initData?: {
-      initMethodName: keyof ContractMethods<Abi>;
-      //impossible to type unless we do something like this.getInitMethod(artifact, methodName).encode(args);
-      initMethodArgs: unknown[];
-    };
+interface NetworkArgument<Abi extends ContractAbi = any> {
+  args: ContractConstructorArgs<Abi>;
+  initData?: {
+    initMethodName: keyof ContractMethods<Abi>;
+    //impossible to type unless we do something like this.getInitMethod(artifact, methodName).encode(args);
+    initMethodArgs: unknown[];
   };
+}
+
+export type NetworkArguments<Abi extends ContractAbi = any> = {
+  [network in DeploymentNetwork]: NetworkArgument<Abi>;
 };
 
 export interface DeployOptions {

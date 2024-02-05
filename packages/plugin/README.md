@@ -1,58 +1,78 @@
-# Chainsafe's Hardhat Plugin for Multichain deployment with Sygma
+# ChainSafe's Hardhat Plugin for Multichain Deployment with Sygma
 
-Experience the seamless integration of Hardhat with Sygma: the ultimate plugin for effortlessly deploying your Ethereum smart contracts across multiple chains.  
-Embrace the power of Sygma protocol, and transform your deployment process into a streamlined, efficient, and multi-chain adventure.  
-With this tool, you're not just deploying contracts; you're unlocking new horizons in the blockchain ecosystem.
-
+Unlock the full potential of Hardhat with Sygma: the premier plugin for effortlessly deploying your Ethereum smart contracts across multiple blockchain networks. Leveraging the Sygma protocol, this tool revolutionizes your deployment process, making it efficient, streamlined, and truly multi-chain. With ChainSafe's plugin, you're not just deploying contracts—you're exploring new possibilities within the blockchain ecosystem.
 
 ## Installation
 
+To install, run:
+
 ```bash
-npm install --save-dev @chainsafe/hardhat-plugin-multichain-deploy
+npm install --save-dev @chainsafe/hardhat-plugin-multichain-deploy @buildwithsygma/sygma-sdk-core
 ```
 
-Import the plugin in your `hardhat.config.js``:
+### Importing the Plugin
+
+For JavaScript users, add this line to your `hardhat.config.js`:
 
 ```js
 require("@chainsafe/hardhat-plugin-multichain-deploy");
 ```
 
-Or if you are using TypeScript, in your `hardhat.config.ts``:
+For TypeScript users, include it in your `hardhat.config.ts`:
 
 ```js
 import "@chainsafe/hardhat-plugin-multichain-deploy";
 ```
 
-## Environment extensions
+## Environment Extensions
 
-The package introduces a `multichain` namespace to the Hardhat Runtime Environment (HRE).
+The plugin adds a `multichain` namespace to the Hardhat Runtime Environment (HRE), introducing new methods for deployment:
 
-New methods introduced:
- * `async waitInitialization(): Promise<void>`: Returns a promise. Wait for this promise to resolve to ensure readiness for using Sygma.
- * `async deployMultichain(nameOrBytecode: string, arguments: string[], options?: Object): Promise<TxHash>`: Deploys a smart contract.
-   * `nameOrBytecode`: Name or bytecode of the smart contract.
-   * `arguments`: Arguments for the smart contract deployment.
-   * `options`: Additional deployment options (details TBD).
+```ts
+async deployMultichain<Abi extends ContractAbi = any>(
+    contractName: string,
+    networkArgs: NetworkArguments<Abi>,
+    options?: DeployOptions
+): Promise<{
+   deploymentInfo: DeploymentInfo[];
+   receipt: Transaction;
+} | void>
+
+async deployMultichainBytecode<Abi extends ContractAbi = any>(
+    contractBytecode: string,
+    contractAbi: Abi,
+    networkArgs: NetworkArguments<Abi>,
+    options?: DeployOptions
+): Promise<{
+   deploymentInfo: DeploymentInfo[];
+   receipt: Transaction;
+} | void>
+```
+
+- `contractName`: Name of the contract for deployment.
+- `contractBytecode`: Compiled bytecode of the contract.
+- `contractAbi`: Contract ABI, detailing methods and structures for interaction.
+- `networkArgs`: Maps network identifiers to deployment arguments. Refer to [NetworkArguments.md](../../docs/plugin/NetworkArguments.md) for more.
+- `options`: Optional deployment settings. Details in [DeployOptions.md](../../docs/plugin/DeployOptions.md).
+
+## Environment Variable
+
+- `ADAPTER_ADDRESS`: Address of the adapter, facilitating deployment across chains with Sygma. Use this if deploying custom adapters.
 
 ## Configuration
 
-The Hardhat Plugin Multichain Deployment plugin requires specific configurations for successful multi-chain deployment.
+To utilize the Multichain Deployment plugin, specific settings are required:
 
-This plugin extends introduce new name space called `multichain` with options:
- * `environment`: Specifies the Sygma environment for deployment.
-   * Import `Environment` from `@buildwithsygma/sygma-sdk-core` for constant values.
-   * Options: `mainnet`, `testnet`, `devnet`, `local`.
- * `deploymentNetworks`: List of networks for deployment.
-   * Ensure network names match those in `networks`.
-   * Networks must correspond with Sygma routes. Refer to [Sygma documentation](https://docs.buildwithsygma.com/environments) for routes.
+- `multichain` namespace: Configures deployment settings.
+   - `environment`: Defines the Sygma environment. Use `Environment` from `@buildwithsygma/sygma-sdk-core` for constants.
 
-Example configuration:
+### Example Configuration
 
 ```typescript
 import { Environment } from "@buildwithsygma/sygma-sdk-core";
 
 const config: HardhatUserConfig = {
-    // ... other configurations ...
+    // Other configurations...
     defaultNetwork: "goerli",
     networks: {
         sepolia: { ... },
@@ -61,25 +81,30 @@ const config: HardhatUserConfig = {
     },
     multichain: {
         environment: Environment.TESTNET,
-        deploymentNetworks: ["sepolia", "optimisticGoerli"],
     },
 };
 ```
 
-## Usages
+## Usage
 
-### TODO
+With the setup complete, let’s deploy an ERC20 contract across multiple chains:
 
-After familiarizing yourself with the capabilities, let's see how everything works together.  
-
-Example scenario: You've created an ERC20 contract and want to deploy it across multiple chains using the configuration mentioned above.
 ```typescript
-// Deploy the contract
-const tx = await hre.multichain.deployMultichain('MySuperToken', [name, symbol, decimals], { singer: web3signer });
+const networkArgs = {
+   sepolia: {
+     args: [name, symbol, decimals],
+   },
+   goerli: {
+      args: [name, symbol, decimals],
+   },
+};
+const options = {
+   salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
+};
 
-console.log("Transaction Hash: ", tx);
+this.hre.multichain.deployMultichain("MySuperToken", networkArgs, options);
 ```
 
 ## Contribution
 
-For contributing to the project, please refer to the [root readme](../../README.md) file.
+To contribute to this project, please see the [monorepo readme](../../README.md) for guidelines.
