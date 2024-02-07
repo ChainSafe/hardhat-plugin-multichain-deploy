@@ -1,11 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Config, Domain } from "@buildwithsygma/sygma-sdk-core";
-import Web3, {
-  ContractAbi,
-  Transaction,
-  utils,
-  PayableCallOptions,
-} from "web3";
+import Web3, { ContractAbi, utils, PayableCallOptions } from "web3";
 import { vars } from "hardhat/config";
 import {
   getConfigEnvironmentVariable,
@@ -15,12 +10,16 @@ import {
   mapNetworkArgs,
 } from "./utils";
 import { AdapterABI } from "./adapterABI";
-import { DeployOptions, DeploymentInfo, NetworkArguments } from "./types";
+import {
+  DeployOptions,
+  NetworkArguments,
+  DeployMultichainResponse,
+} from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
   private isInitiated: boolean = false;
   private domains: Domain[] = [];
-  private readonly web3: Web3 | null;
+  private readonly web3: Web3;
 
   public constructor(private readonly hre: HardhatRuntimeEnvironment) {
     const provider = this.hre.network.provider;
@@ -56,10 +55,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * @param contractName - The name of the contract to be deployed.
    * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments NetworkArguments}.
    * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions DeployOptions}.
-   * @returns A Promise resolving to a Transaction object or void.
+   * @returns A Promise resolving to a Transaction object.
    *
    * @example
-   * ```
    * const networkArgs = {
    *    sepolia: {
    *      args: [ 18, "token" ],
@@ -71,16 +69,12 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * };
    *
    * this.hre.multichain.deployMultichain("HelloContract", networkArgs, options);
-   * ```
    */
   public async deployMultichain<Abi extends ContractAbi = any>(
     contractName: string,
     networkArgs: NetworkArguments<Abi>,
     options?: DeployOptions
-  ): Promise<{
-    deploymentInfo: DeploymentInfo[];
-    receipt: Transaction;
-  } | void> {
+  ): Promise<DeployMultichainResponse> {
     const artifact = this.hre.artifacts.readArtifactSync(contractName);
 
     return this.deployMultichainBytecode(
@@ -98,10 +92,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
    * @param contractAbi - The ABI of the contract. It defines the methods and structures used to interact with the binary contract.
    * @param networkArgs - An object mapping network identifiers to their deployment arguments. Each network can have unique settings for the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/NetworkArguments NetworkArguments}.
    * @param options - Optional settings for the deployment process. These can include various configurations specific to the deployment. See {@link https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/docs/plugin/DeployOptions DeployOptions}.
-   * @returns A Promise resolving to a Transaction object or void.
+   * @returns A Promise resolving to a Transaction object.
    *
    * @example
-   * ```
    * const contractBytecode = "0x60a060405234801561001057600080fd5b5060405161052b38038061052b83...";
    * const contractAbi = [{ ... }, { ... }];
    *
@@ -115,35 +108,30 @@ export class MultichainHardhatRuntimeEnvironmentField {
    *    salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
    * };
    *
-   * this.hre.multichain.deployMultichain(contractBytecode, contractAbi, networkArgs, options);
-   * ```
+   * this.hre.multichain.deployMultichainBytecode(contractBytecode, contractAbi, networkArgs, options);
    */
   public async deployMultichainBytecode<Abi extends ContractAbi = any>(
     contractBytecode: string,
     contractAbi: Abi,
     networkArgs: NetworkArguments<Abi>,
     options?: DeployOptions
-  ): Promise<{
-    deploymentInfo: DeploymentInfo[];
-    receipt: Transaction;
-  } | void> {
+  ): Promise<DeployMultichainResponse> {
     if (!this.isInitiated) await this.initConfig();
-    if (!this.web3) return;
 
     //optional params
     const salt = options?.salt ?? utils.randomBytes(32);
     const isUniquePerChain = options?.isUniquePerChain ?? false;
-
-    //adapter contract
-    const adapterContract = new this.web3.eth.Contract<typeof AdapterABI>(
-      AdapterABI,
-      this.ADAPTER_ADDRESS
-    );
+    const adapterAddress = options?.adapterAddress ?? this.ADAPTER_ADDRESS;
 
     const { constructorArgs, initDatas, deployDomainIDs } = mapNetworkArgs(
       contractAbi,
       networkArgs,
       this.domains
+    );
+
+    const adapterContract = new this.web3.eth.Contract<typeof AdapterABI>(
+      AdapterABI,
+      adapterAddress
     );
 
     const fees = await adapterContract.methods
@@ -182,9 +170,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const networkNames = Object.keys(networkArgs);
     const { transactionHash } = receipt;
     console.log(
-      `Multichain deployment initiated, transaction hash: ${transactionHash}
-      
-      ` +
+      `Multichain deployment initiated, transaction hash: ${transactionHash}` +
         "\n" +
         "Destinaton networks:" +
         networkNames.join("\r\n")
@@ -199,7 +185,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
       return deployDomain.chainId;
     });
 
-    const deploymentInfo: DeploymentInfo[] = await Promise.all(
+    await Promise.all(
       destinationDomainChainIDs.map(async (domainChainID, index) => {
         const network = networkNames[index];
 
@@ -214,27 +200,42 @@ export class MultichainHardhatRuntimeEnvironmentField {
         console.log(
           `Contract deploying on ${network.toUpperCase()}: ${contractAddress}`
         );
-
-        const explorerUrl = await transferStatusInterval(
-          this.hre.config.multichain.environment,
-          transactionHash,
-          domainChainID
-        );
-
-        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
-
-        return {
-          network,
-          contractAddress,
-          explorerUrl,
-          transactionHash,
-        };
       })
     );
 
     return {
-      receipt,
-      deploymentInfo,
+      transactionHash,
+      domainIDs: deployDomainIDs,
     };
+  }
+
+  /**
+   * Fetches and logs the deployment information for a smart contract deployed across multiple blockchain networks.
+   * This function retrieves the status of a contract's deployment on each specified network domain using the transaction hash
+   * obtained from the `deployMultichain` or `deployMultichainBytecode` function.
+   *
+   * @param transactionHash The hash of the transaction returned by `deployMultichain` or `deployMultichainBytecode`.
+   * @param domainIDs An array of bigint values representing the domain IDs on which the contract was deployed. These IDs correspond
+   *                  to the blockchain networks registered on Sygma and should match the ones used during the deployment process.
+   *
+   * @example
+   * const { transactionHash, domainIDs } = await this.hre.multichain.deployMultichain("HelloContract", networkArgs);
+   * await getDeploymentInfo(transactionHash, domainIDs);
+   */
+  public async getDeploymentInfo(
+    transactionHash: string,
+    domainIDs: bigint[]
+  ): Promise<void> {
+    await Promise.all(
+      domainIDs.map(async (domainId): Promise<void> => {
+        const explorerUrl = await transferStatusInterval(
+          this.hre.config.multichain.environment,
+          transactionHash,
+          domainId
+        );
+
+        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
+      })
+    );
   }
 }
