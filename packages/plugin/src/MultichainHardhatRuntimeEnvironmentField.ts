@@ -35,7 +35,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
     "ADAPTER_ADDRESS",
     "0x85d62ad850b322152bf4ad9147bfbf097da42217"
   );
-  public LOCAL_ADAPTER_ADDRESS = "";
 
   //current Sygma hardcoded gasLimit
   private gasLimit = 1000000;
@@ -55,8 +54,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.isInitiated;
   }
 
-  public async initLocalEnvironment(): Promise<void> {
-    const [deployer] = await this.web3.eth.getAccounts();
+  public async initLocalEnvironment(account?: string): Promise<string> {
+    if (!account) account = (await this.web3.eth.getAccounts())[0]
 
     const gasMultiplier = this.hre.network.name.includes("arbi") ? 10 : 1;
     const txOptionsAdapter = { gasLimit: 1900000 * gasMultiplier };
@@ -67,28 +66,28 @@ export class MultichainHardhatRuntimeEnvironmentField {
       .deploy({
         data: CreateXBytecode,
       })
-      .send({ from: deployer, ...txOptionsCreateX });
+      .send({ from: account, ...txOptionsCreateX });
     console.log(`CreateX locally deployed: ${response.options.address!}`);
 
     const deployerSalt = this.web3.utils.encodePacked(
       ["bytes", "bytes", "bytes"],
-      [deployer, "0x00", "0x0000000000000000000000"]
+      [account, "0x00", "0x0000000000000000000000"]
     );
 
     const receipt = await createX.methods
       .deployCreate3(deployerSalt, AdapterBytecode)
-      .send({ from: deployer, ...txOptionsAdapter });
+      .send({ from: account, ...txOptionsAdapter });
 
     const adapterAddress = receipt.events!.ContractCreation.returnValues
       .newContract as string;
-
-    this.LOCAL_ADAPTER_ADDRESS = adapterAddress;
 
     console.log(
       `Adapter locally deployed: ${adapterAddress}` +
         "\n" +
         "Local environment initiated"
     );
+
+    return adapterAddress;
   }
 
   /**
