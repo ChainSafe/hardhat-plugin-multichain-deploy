@@ -154,7 +154,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 export async function transferStatusInterval(
   environment: Environment,
   txHash: string,
-  domainID: number
+  domainID: bigint
 ): Promise<string> {
   let explorerUrl: string = "";
 

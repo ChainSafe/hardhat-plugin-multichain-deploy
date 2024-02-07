@@ -9,6 +9,7 @@ interface DeployOptions {
   salt?: MatchPrimitiveType<"bytes32", unknown>;
   isUniquePerChain?: boolean;
   customNonPayableTxOptions?: NonPayableCallOptions;
+  adapterAddress?: Address;
 }
 ```
 
@@ -25,6 +26,10 @@ interface DeployOptions {
 - **Details**: Customizes transaction settings for contract calls. This option allows setting sender details and other transaction parameters.
 - **Reference**: For detailed information about `NonPayableCallOptions`, please refer to the [web3.js documentation](https://docs.web3js.org/api/web3-types/interface/NonPayableCallOptions/).
 
+### adapterAddress
+- **Description**: Specifies address of a custom adapter for deployments. This is useful for local testing or when needing to interact with a specific deployment strategy, such as a mocked adapter.
+- **Purpose**: Allows the user to override the default deployment adapter with their own, providing greater flexibility and control over the deployment process.
+
 ## Example
 
 In this example, `DeployOptions` is configured to deploy a contract with a specified salt for address generation, ensuring unique addresses on each chain, and customizing the sender address for the deployment transaction.
@@ -36,6 +41,7 @@ const options: DeployOptions = {
   customNonPayableTxOptions: {
     from: "0x1605B51d318bFfBFd246D565Ee55522b66ddc34a",
   },
+  adapterAddress: "0x1234567890ABCDEF1234567890ABCDEF12345678"
 };
 ```
 
