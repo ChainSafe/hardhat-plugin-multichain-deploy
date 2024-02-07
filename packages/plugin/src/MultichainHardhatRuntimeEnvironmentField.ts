@@ -14,6 +14,10 @@ import {
   AdapterBytecode,
   CreateXABI,
   CreateXBytecode,
+  MockBridgeABI,
+  MockBridgeBytecode,
+  MockFeeHandlerABI,
+  MockFeeHandlerBytecode,
 } from "./adapterABI";
 import {
   DeployOptions,
@@ -54,29 +58,66 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.isInitiated;
   }
 
-  public async initLocalEnvironment(account?: string): Promise<string> {
-    if (!account) account = (await this.web3.eth.getAccounts())[0]
+  public async initLocalEnvironment(deployer?: string): Promise<string> {
+    // Assign default values if is not provided
+    if (!deployer) deployer = (await this.web3.eth.getAccounts())[0];
+
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+    /** Deploy Mock Sygma Bridge */
+    const DOMAIN_ID = BigInt(10);
+
+    const feeHandler = new this.web3.eth.Contract(MockFeeHandlerABI);
+    const feeHandlerResponse = await feeHandler
+      .deploy({ data: MockFeeHandlerBytecode })
+      .send({ from: deployer });
+
+    const bridge = new this.web3.eth.Contract(MockBridgeABI);
+    const bridgeResponse = await bridge
+      .deploy({
+        data: MockBridgeBytecode,
+        arguments: [
+          deployer,
+          feeHandlerResponse.options.address || ZERO_ADDRESS,
+          DOMAIN_ID,
+        ],
+      })
+      .send({ from: deployer });
+
+    /** Deploy Adapter */
+    const RESOURCE_ID =
+      "0x000000000000000000000000000000000000000000000000000000000000cafe";
 
     const gasMultiplier = this.hre.network.name.includes("arbi") ? 10 : 1;
     const txOptionsAdapter = { gasLimit: 1900000 * gasMultiplier };
     const txOptionsCreateX = { gasLimit: 2700000 * gasMultiplier };
 
     const createX = new this.web3.eth.Contract(CreateXABI);
-    const response = await createX
+    const createXResponse = await createX
       .deploy({
         data: CreateXBytecode,
       })
-      .send({ from: account, ...txOptionsCreateX });
-    console.log(`CreateX locally deployed: ${response.options.address!}`);
-
-    const deployerSalt = this.web3.utils.encodePacked(
-      ["bytes", "bytes", "bytes"],
-      [account, "0x00", "0x0000000000000000000000"]
+      .send({ from: deployer, ...txOptionsCreateX });
+    console.log(
+      `CreateX locally deployed: ${createXResponse.options.address!}`
     );
 
+    const adapter = new this.web3.eth.Contract(AdapterABI);
+    const adapterEncodedAbi = adapter
+      .deploy({
+        data: AdapterBytecode,
+        arguments: [
+          createXResponse.options.address || ZERO_ADDRESS,
+          bridgeResponse.options.address || ZERO_ADDRESS,
+          RESOURCE_ID,
+        ],
+      })
+      .encodeABI();
+
+    const salt = `${deployer}000000000000000000000000`;
     const receipt = await createX.methods
-      .deployCreate3(deployerSalt, AdapterBytecode)
-      .send({ from: account, ...txOptionsAdapter });
+      .deployCreate3(salt, adapterEncodedAbi)
+      .send({ from: deployer, ...txOptionsAdapter });
 
     const adapterAddress = receipt.events!.ContractCreation.returnValues
       .newContract as string;
