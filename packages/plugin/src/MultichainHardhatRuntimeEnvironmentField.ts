@@ -60,11 +60,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
   }
 
   /**
-   * Initializes the local development environment by deploying mock contracts required for testing contract interactions with the Sygma Bridge via Adapter contracts.
-   * This method is crucial for setting up a local testing environment that simulates the deployment process and interactions in a controlled manner, mirroring real-world operations with the Sygma Bridge.
+   * Initializes the local development environment by deploying mock contracts necessary for testing interactions with the Sygma Bridge through Adapter contracts. This setup is vital for developers aiming to simulate the deployment process and contract interactions within a local and controlled environment, closely replicating interactions with the Sygma Bridge in production.
    *
-   * @param deployer - Optional. The Ethereum address of the deployer account. If not specified, the method uses the first account from the list returned by accounts. This account is responsible for deploying the mock contracts.
-   * @returns A `Promise` that resolves to an object containing the addresses of the deployed mock contracts: `adapter`, `createX`, `bridge`, and `feeHandler`. These addresses can be utilized in further development or testing activities to interact with the contracts.
+   * @param deployer - Optional. The Ethereum address of the deployer account. If not provided, the method defaults to using the first available account. This account is tasked with deploying the mock contracts and is essential for setting up the local testing environment.
+   * @returns A `Promise` that resolves to an object containing the addresses of the deployed mock contracts. These addresses are crucial for conducting further development or testing, enabling comprehensive interaction with the contracts.
    *
    * @example
    * const { adapterAddress } = await initLocalEnvironment();
