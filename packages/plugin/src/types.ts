@@ -42,8 +42,8 @@ export interface DeployMultichainResponse {
 }
 
 export interface DeployedLocalEnvironmentContracts {
-  createX: string;
-  adapter: string;
-  feeHandler: string;
-  bridge: string;
+  createXAddress: string;
+  adapterAddress: string;
+  feeHandlerAddress: string;
+  bridgeAddress: string;
 }

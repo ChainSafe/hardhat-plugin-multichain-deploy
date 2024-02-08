@@ -142,10 +142,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
     );
 
     return {
-      adapter: adapterAddress,
-      createX: createXAddress,
-      bridge: bridgeAddress,
-      feeHandler: feeHandlerAddress,
+      adapterAddress,
+      createXAddress,
+      bridgeAddress,
+      feeHandlerAddress,
     };
   }
 
