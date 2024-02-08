@@ -36,7 +36,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.web3 = new Web3(provider);
   }
 
-  public ADAPTER_ADDRESS = vars.get(
+  private ADAPTER_ADDRESS = vars.get(
     "ADAPTER_ADDRESS",
     "0x85d62ad850b322152bf4ad9147bfbf097da42217"
   );
@@ -105,34 +105,23 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const RESOURCE_ID =
       "0x000000000000000000000000000000000000000000000000000000000000cafe";
 
-    const gasMultiplier = this.hre.network.name.includes("arbi") ? 10 : 1;
-    const txOptionsAdapter = { gasLimit: 1900000 * gasMultiplier };
-    const txOptionsCreateX = { gasLimit: 2700000 * gasMultiplier };
-
     const createX = new this.web3.eth.Contract(CreateXABI);
     const createXResponse = await createX
       .deploy({
         data: CreateXBytecode,
       })
-      .send({ from: deployer, ...txOptionsCreateX });
+      .send({ from: deployer });
     const createXAddress = createXResponse.options.address || ZERO_ADDRESS;
     console.log(`CreateX locally deployed: ${createXAddress}`);
 
     const adapter = new this.web3.eth.Contract(AdapterABI);
-    const adapterEncodedAbi = adapter
+    const adapterResponse = await adapter
       .deploy({
         data: AdapterBytecode,
         arguments: [createXAddress, bridgeAddress, RESOURCE_ID],
       })
-      .encodeABI();
-
-    const salt = `${deployer}000000000000000000000000`;
-    const receipt = await createX.methods
-      .deployCreate3(salt, adapterEncodedAbi)
-      .send({ from: deployer, ...txOptionsAdapter });
-
-    const adapterAddress = receipt.events!.ContractCreation.returnValues
-      .newContract as string;
+      .send({ from: deployer });
+    const adapterAddress = adapterResponse.options.address || ZERO_ADDRESS;
 
     console.log(
       `Adapter locally deployed: ${adapterAddress}` +
