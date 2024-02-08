@@ -23,6 +23,7 @@ import {
   DeployOptions,
   NetworkArguments,
   DeployMultichainResponse,
+  DeployedLocalEnvironmentContracts,
 } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
@@ -58,7 +59,9 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.isInitiated;
   }
 
-  public async initLocalEnvironment(deployer?: string): Promise<string> {
+  public async initLocalEnvironment(
+    deployer?: string
+  ): Promise<DeployedLocalEnvironmentContracts> {
     // Assign default values if is not provided
     if (!deployer) deployer = (await this.web3.eth.getAccounts())[0];
 
@@ -71,18 +74,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const feeHandlerResponse = await feeHandler
       .deploy({ data: MockFeeHandlerBytecode })
       .send({ from: deployer });
+    const feeHandlerAddress =
+      feeHandlerResponse.options.address || ZERO_ADDRESS;
 
     const bridge = new this.web3.eth.Contract(MockBridgeABI);
     const bridgeResponse = await bridge
       .deploy({
         data: MockBridgeBytecode,
-        arguments: [
-          deployer,
-          feeHandlerResponse.options.address || ZERO_ADDRESS,
-          DOMAIN_ID,
-        ],
+        arguments: [deployer, feeHandlerAddress, DOMAIN_ID],
       })
       .send({ from: deployer });
+    const bridgeAddress = bridgeResponse.options.address || ZERO_ADDRESS;
 
     /** Deploy Adapter */
     const RESOURCE_ID =
@@ -98,19 +100,14 @@ export class MultichainHardhatRuntimeEnvironmentField {
         data: CreateXBytecode,
       })
       .send({ from: deployer, ...txOptionsCreateX });
-    console.log(
-      `CreateX locally deployed: ${createXResponse.options.address!}`
-    );
+    const createXAddress = createXResponse.options.address || ZERO_ADDRESS;
+    console.log(`CreateX locally deployed: ${createXAddress}`);
 
     const adapter = new this.web3.eth.Contract(AdapterABI);
     const adapterEncodedAbi = adapter
       .deploy({
         data: AdapterBytecode,
-        arguments: [
-          createXResponse.options.address || ZERO_ADDRESS,
-          bridgeResponse.options.address || ZERO_ADDRESS,
-          RESOURCE_ID,
-        ],
+        arguments: [createXAddress, bridgeAddress, RESOURCE_ID],
       })
       .encodeABI();
 
@@ -128,7 +125,12 @@ export class MultichainHardhatRuntimeEnvironmentField {
         "Local environment initiated"
     );
 
-    return adapterAddress;
+    return {
+      adapter: adapterAddress,
+      createX: createXAddress,
+      bridge: bridgeAddress,
+      feeHandler: feeHandlerAddress,
+    };
   }
 
   /**
