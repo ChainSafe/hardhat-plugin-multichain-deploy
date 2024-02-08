@@ -40,3 +40,10 @@ export interface DeployMultichainResponse {
   domainIDs: bigint[];
   transactionHash: HexString;
 }
+
+export interface DeployedLocalEnvironmentContracts {
+  createXAddress: string;
+  adapterAddress: string;
+  feeHandlerAddress: string;
+  bridgeAddress: string;
+}

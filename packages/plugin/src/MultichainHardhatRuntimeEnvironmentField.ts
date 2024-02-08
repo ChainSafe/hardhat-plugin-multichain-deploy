@@ -9,11 +9,21 @@ import {
   transferStatusInterval,
   mapNetworkArgs,
 } from "./utils";
-import { AdapterABI } from "./adapterABI";
+import {
+  AdapterABI,
+  AdapterBytecode,
+  CreateXABI,
+  CreateXBytecode,
+  MockBridgeABI,
+  MockBridgeBytecode,
+  MockFeeHandlerABI,
+  MockFeeHandlerBytecode,
+} from "./adapterABI";
 import {
   DeployOptions,
   NetworkArguments,
   DeployMultichainResponse,
+  DeployedLocalEnvironmentContracts,
 } from "./types";
 
 export class MultichainHardhatRuntimeEnvironmentField {
@@ -26,7 +36,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.web3 = new Web3(provider);
   }
 
-  public ADAPTER_ADDRESS = vars.get(
+  private ADAPTER_ADDRESS = vars.get(
     "ADAPTER_ADDRESS",
     "0x85d62ad850b322152bf4ad9147bfbf097da42217"
   );
@@ -47,6 +57,84 @@ export class MultichainHardhatRuntimeEnvironmentField {
     this.domains = config.getDomains();
 
     this.isInitiated;
+  }
+
+  /**
+   * Initializes the local development environment by deploying mock contracts necessary for testing interactions with the Sygma Bridge through Adapter contracts. This setup is vital for developers aiming to simulate the deployment process and contract interactions within a local and controlled environment, closely replicating interactions with the Sygma Bridge in production.
+   *
+   * @param deployer - Optional. The Ethereum address of the deployer account. If not provided, the method defaults to using the first available account. This account is tasked with deploying the mock contracts and is essential for setting up the local testing environment.
+   * @returns A `Promise` that resolves to an object containing the addresses of the deployed mock contracts. These addresses are crucial for conducting further development or testing, enabling comprehensive interaction with the contracts.
+   *
+   * @example
+   * const { adapterAddress } = await initLocalEnvironment();
+   *
+   * const options = {
+   *    salt: "0xcafe00000000000000000000000000000000000000000000000000000000cafe",
+   *    adapterAddress,
+   * };
+   * await this.hre.multichain.deployMultichain("HelloContract", networkArgs, options);
+   */
+  public async initLocalEnvironment(
+    deployer?: string
+  ): Promise<DeployedLocalEnvironmentContracts> {
+    // Assign default values if is not provided
+    if (!deployer) deployer = (await this.web3.eth.getAccounts())[0];
+
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+    /** Deploy Mock Sygma Bridge */
+    const DOMAIN_ID = BigInt(10);
+
+    const feeHandler = new this.web3.eth.Contract(MockFeeHandlerABI);
+    const feeHandlerResponse = await feeHandler
+      .deploy({ data: MockFeeHandlerBytecode })
+      .send({ from: deployer });
+    const feeHandlerAddress =
+      feeHandlerResponse.options.address || ZERO_ADDRESS;
+
+    const bridge = new this.web3.eth.Contract(MockBridgeABI);
+    const bridgeResponse = await bridge
+      .deploy({
+        data: MockBridgeBytecode,
+        arguments: [deployer, feeHandlerAddress, DOMAIN_ID],
+      })
+      .send({ from: deployer });
+    const bridgeAddress = bridgeResponse.options.address || ZERO_ADDRESS;
+
+    /** Deploy Adapter */
+    const RESOURCE_ID =
+      "0x000000000000000000000000000000000000000000000000000000000000cafe";
+
+    const createX = new this.web3.eth.Contract(CreateXABI);
+    const createXResponse = await createX
+      .deploy({
+        data: CreateXBytecode,
+      })
+      .send({ from: deployer });
+    const createXAddress = createXResponse.options.address || ZERO_ADDRESS;
+    console.log(`CreateX locally deployed: ${createXAddress}`);
+
+    const adapter = new this.web3.eth.Contract(AdapterABI);
+    const adapterResponse = await adapter
+      .deploy({
+        data: AdapterBytecode,
+        arguments: [createXAddress, bridgeAddress, RESOURCE_ID],
+      })
+      .send({ from: deployer });
+    const adapterAddress = adapterResponse.options.address || ZERO_ADDRESS;
+
+    console.log(
+      `Adapter locally deployed: ${adapterAddress}` +
+        "\n" +
+        "Local environment initiated"
+    );
+
+    return {
+      adapterAddress,
+      createXAddress,
+      bridgeAddress,
+      feeHandlerAddress,
+    };
   }
 
   /**
