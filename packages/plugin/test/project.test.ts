@@ -7,7 +7,7 @@ import HelloSygma from "@chainsafe/hardhat-plugin-multichain-deploy-contracts/ar
 import { MultichainHardhatRuntimeEnvironmentField } from "../src/MultichainHardhatRuntimeEnvironmentField";
 
 import { DeployedLocalEnvironmentContracts } from "../src/types";
-import { useEnvironment, useHardhatNode } from "./helpers";
+import { useEnvironment } from "./helpers";
 
 use(chaiAsPromised);
 
@@ -36,7 +36,6 @@ describe("Integration tests examples", function () {
 
   describe("Hardhat Runtime Environment extension - initLocalEnvironment", function () {
     useEnvironment("hardhat-localhost");
-    useHardhatNode();
 
     it("Should deploy all required contracts on testnet", async function () {
       const addresses = await this.hre.multichain.initLocalEnvironment();
@@ -52,7 +51,6 @@ describe("Integration tests examples", function () {
 
   describe("Hardhat Runtime Environment extension - deploy methods", function () {
     useEnvironment("hardhat-localhost");
-    useHardhatNode();
 
     let addresses: DeployedLocalEnvironmentContracts;
 
