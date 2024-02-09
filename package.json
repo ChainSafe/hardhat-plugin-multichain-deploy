@@ -6,7 +6,8 @@
   "packageManager": "yarn@3.2.1",
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "example"
     ]
   },
   "engines": {
