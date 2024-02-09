@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Config, Domain } from "@buildwithsygma/sygma-sdk-core";
-import Web3, { ContractAbi, utils, PayableCallOptions } from "web3";
+import Web3, { ContractAbi, utils } from "web3";
 import { vars } from "hardhat/config";
 import {
   getConfigEnvironmentVariable,
@@ -56,7 +56,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
     this.domains = config.getDomains();
 
-    this.isInitiated;
+    this.isInitiated = true;
   }
 
   /**
@@ -83,7 +83,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     /** Deploy Mock Sygma Bridge */
-    const DOMAIN_ID = BigInt(10);
+    const DOMAIN_ID = BigInt(1);
 
     const feeHandler = new this.web3.eth.Contract(MockFeeHandlerABI);
     const feeHandlerResponse = await feeHandler
@@ -234,14 +234,8 @@ export class MultichainHardhatRuntimeEnvironmentField {
       )
       .call();
 
-    let payableTxOptions: PayableCallOptions = { value: sumedFees(fees) };
+    const [deployer] = await this.web3.eth.getAccounts();
 
-    if (options?.customNonPayableTxOptions) {
-      payableTxOptions = {
-        ...options.customNonPayableTxOptions,
-        value: sumedFees(fees),
-      };
-    }
     console.log("Sending transaction...");
     const receipt = await adapterContract.methods
       .deploy(
@@ -254,7 +248,11 @@ export class MultichainHardhatRuntimeEnvironmentField {
         deployDomainIDs,
         fees
       )
-      .send(payableTxOptions);
+      .send({
+        from: deployer,
+        value: sumedFees(fees),
+        ...(options!.customNonPayableTxOptions || {}),
+      });
     const networkNames = Object.keys(networkArgs);
     const { transactionHash } = receipt;
     console.log(
@@ -263,8 +261,6 @@ export class MultichainHardhatRuntimeEnvironmentField {
         "Destinaton networks:" +
         networkNames.join("\r\n")
     );
-
-    const [deployer] = await this.web3.eth.getAccounts();
 
     const destinationDomainChainIDs = deployDomainIDs.map((deployDomainID) => {
       const deployDomain: Domain = this.domains.find(
