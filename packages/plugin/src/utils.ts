@@ -114,6 +114,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
       const argsInBytes = eth.abi.encodeParameters(
         constructorAbi,
+        // @ts-ignore
         networkConstructorArgs
       );
       //provided constructorAbi with args

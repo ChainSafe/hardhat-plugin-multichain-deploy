@@ -8,6 +8,9 @@ import "@chainsafe/hardhat-plugin-multichain-deploy";
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
   "ts-artifact": {},
+  multichain: {
+
+  }
 };
 
 export default config;
