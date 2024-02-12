@@ -1,10 +1,26 @@
 {
   "name": "multichain-deploy-example",
   "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
   "devDependencies": {
-    "@buildwithsygma/sygma-sdk-core": "^2.6.3",
-    "@chainsafe/hardhat-plugin-multichain-deploy": "workspace:^",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.4",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.19.5"
+    "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "@types/node": ">=16.0.0",
+    "chai": "4",
+    "ethers": "^6.11.0",
+    "hardhat": "^2.19.5",
+    "hardhat-gas-reporter": "^1.0.10",
+    "solidity-coverage": "^0.8.7",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.3.2",
+    "typescript": ">=4.5.0"
   }
 }

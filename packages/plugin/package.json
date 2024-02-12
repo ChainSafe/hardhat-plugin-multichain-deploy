@@ -6,7 +6,6 @@
   "author": "ChainSafe Systems",
   "license": "Apache-2.0",
   "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
   "keywords": [
     "ethereum",
     "sygma",
@@ -17,7 +16,7 @@
     "lint": "eslint --color --ext .ts src/",
     "lint:fix": "yarn run lint --fix",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
-    "build": "tsc",
+    "build": "tsc --build",
     "watch": "tsc -w",
     "prepublishOnly": "yarn build"
   },
