@@ -1,4 +1,4 @@
-import { ethers, web3 } from "hardhat";
+import hre, { ethers } from "hardhat";
 
 async function main() {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
@@ -17,6 +17,8 @@ async function main() {
       lockedAmount
     )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
   );
+
+  console.warn("is multichain in hre:", "multichain" in hre);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

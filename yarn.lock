@@ -7786,6 +7786,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "multichain-deploy-example@workspace:example"
   dependencies:
+    "@buildwithsygma/sygma-sdk-core": ^2.6.3
     "@chainsafe/hardhat-plugin-multichain-deploy": "workspace:^"
     "@chainsafe/hardhat-ts-artifact-plugin": ^1.0.0
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.4
