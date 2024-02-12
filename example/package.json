@@ -3,12 +3,21 @@
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "build": "hardhat compile",
+    "hardhat": "hardhat",
+    "test": "hardhat test",
+    "test:integrations": "echo"
+  },
   "devDependencies": {
+    "@chainsafe/hardhat-plugin-multichain-deploy": "workspace:^",
+    "@chainsafe/hardhat-ts-artifact-plugin": "^1.0.0",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.4",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@nomicfoundation/hardhat-web3-v4": "^1.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.2.0",

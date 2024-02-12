@@ -1,4 +1,4 @@
-import {
+import type {
   Address,
   ContractAbi,
   ContractConstructorArgs,
@@ -7,6 +7,7 @@ import {
   MatchPrimitiveType,
   NonPayableCallOptions,
 } from "web3";
+import type { Environment } from "@buildwithsygma/sygma-sdk-core";
 
 export type DeploymentNetwork =
   | "ethereum"
@@ -46,4 +47,8 @@ export interface DeployedLocalEnvironmentContracts {
   adapterAddress: string;
   feeHandlerAddress: string;
   bridgeAddress: string;
+}
+
+export interface MultichainConfig {
+  environment: Environment;
 }

@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, web3 } from "hardhat";
 
 async function main() {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
