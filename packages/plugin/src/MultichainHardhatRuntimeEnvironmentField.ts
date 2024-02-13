@@ -251,7 +251,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
       .send({
         from: deployer,
         value: sumedFees(fees),
-        ...(options!.customNonPayableTxOptions || {}),
+        ...(options?.customNonPayableTxOptions || {}),
       });
     const networkNames = Object.keys(networkArgs);
     const { transactionHash } = receipt;
