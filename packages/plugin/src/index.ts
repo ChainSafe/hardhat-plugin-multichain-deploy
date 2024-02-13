@@ -7,6 +7,8 @@ import { MultichainConfig } from "./types";
 
 import "./type-extensions";
 
+export * from "./types";
+
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
     const multichainConfig = Object.assign({}, userConfig.multichain);

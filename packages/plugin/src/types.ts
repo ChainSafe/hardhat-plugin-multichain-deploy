@@ -17,7 +17,7 @@ export type DeploymentNetwork =
   | "holesky"
   | string;
 
-interface NetworkArgument<Abi extends ContractAbi = any> {
+export interface NetworkArgument<Abi extends ContractAbi = any> {
   args: ContractConstructorArgs<Abi>;
   initData?: {
     initMethodName: keyof ContractMethods<Abi>;
