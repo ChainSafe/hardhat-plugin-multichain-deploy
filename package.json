@@ -14,7 +14,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "yarn workspaces foreach -vpt run build",
+    "build": "yarn workspaces foreach -vpt --no-private run build",
     "lint": "yarn workspaces foreach -vpt run lint",
     "test": "yarn workspaces foreach -vpt run test",
     "test:unit": "yarn workspaces foreach -vpt run test:unit",
