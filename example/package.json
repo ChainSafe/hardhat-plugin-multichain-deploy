@@ -8,8 +8,8 @@
     "hardhat": "hardhat",
     "test": "hardhat test",
     "test:integrations": "echo",
-    "deploy:deployMultichain": "yarn hardhat run scripts/deployMultichain.ts --network mumbai",
-    "deploy:deployMultichainBytecode": "yarn hardhat run scripts/deployMultichainBytecode.ts --network mumbai",
+    "deploy:deployMultichain": "yarn hardhat run scripts/deployMultichain.ts --network sepolia",
+    "deploy:deployMultichainBytecode": "yarn hardhat run scripts/deployMultichainBytecode.ts --network sepolia",
     "deploy:localhost": "yarn hardhat run scripts/localhost.ts"
   },
   "devDependencies": {

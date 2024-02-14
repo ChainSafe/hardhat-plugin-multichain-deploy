@@ -158,6 +158,7 @@ export async function transferStatusInterval(
   domainID: bigint
 ): Promise<string> {
   let explorerUrl: string = "";
+  let handled = false;
 
   await new Promise((resolve) => {
     let controller: AbortController;
@@ -165,6 +166,8 @@ export async function transferStatusInterval(
       controller = new AbortController();
       void getTransferStatusData(environment, txHash, domainID.toString()).then(
         (transferStatus) => {
+          handled = true; //
+
           explorerUrl = transferStatus.explorerUrl;
 
           if (transferStatus.status === "executed") {
@@ -178,7 +181,10 @@ export async function transferStatusInterval(
             );
           }
         }
-      );
+      ).catch((error: Error) => {
+        if (!error.message.includes("Transfer with txHash") && !handled) return;
+        return error;
+      });
     }, 1000);
   });
 
