@@ -1,4 +1,4 @@
-import { HardhatUserConfig } from "hardhat/config";
+import {HardhatUserConfig, vars} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-web3-v4";
 import "@chainsafe/hardhat-ts-artifact-plugin";
@@ -12,7 +12,12 @@ const config: HardhatUserConfig = {
     sepolia: {
       chainId: 11155111,
       url: "https://ethereum-sepolia.publicnode.com",
-      accounts: [],
+      accounts: vars.has("PK") ? [vars.get("PK")] : [],
+    },
+    mumbai: {
+      chainId: 80001,
+      url: "https://gateway.tenderly.co/public/polygon-mumbai",
+      accounts: vars.has("PK") ? [vars.get("PK")] : [],
     },
   },
   multichain: {
