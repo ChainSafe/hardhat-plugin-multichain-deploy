@@ -259,7 +259,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
       `Multichain deployment initiated, transaction hash: ${transactionHash}` +
         "\n" +
         "Destinaton networks:\r\n" +
-        networkNames.map(name => ` - ${name}`).join("\r\n")
+        networkNames.map((name) => ` - ${name}`).join("\r\n")
     );
 
     const destinationDomainChainIDs = deployDomainIDs.map((deployDomainID) => {

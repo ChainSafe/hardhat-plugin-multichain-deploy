@@ -164,8 +164,8 @@ export async function transferStatusInterval(
     let controller: AbortController;
     setInterval(() => {
       controller = new AbortController();
-      void getTransferStatusData(environment, txHash, domainID.toString()).then(
-        (transferStatus) => {
+      void getTransferStatusData(environment, txHash, domainID.toString())
+        .then((transferStatus) => {
           handled = true; //
 
           explorerUrl = transferStatus.explorerUrl;
@@ -180,11 +180,12 @@ export async function transferStatusInterval(
               `Bridge transfer failed`
             );
           }
-        }
-      ).catch((error: Error) => {
-        if (!error.message.includes("Transfer with txHash") && !handled) return;
-        return error;
-      });
+        })
+        .catch((error: Error) => {
+          if (!error.message.includes("Transfer with txHash") && !handled)
+            return;
+          return error;
+        });
     }, 1000);
   });
 
