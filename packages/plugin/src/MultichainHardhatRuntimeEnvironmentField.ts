@@ -310,16 +310,17 @@ export class MultichainHardhatRuntimeEnvironmentField {
     transactionHash: string,
     domainIDs: bigint[]
   ): Promise<void> {
+    let explorerUrl = "";
     await Promise.all(
       domainIDs.map(async (domainId): Promise<void> => {
-        const explorerUrl = await transferStatusInterval(
+        explorerUrl = await transferStatusInterval(
           this.hre.config.multichain.environment,
           transactionHash,
           domainId
         );
-
-        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
       })
     );
+
+    console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
   }
 }
