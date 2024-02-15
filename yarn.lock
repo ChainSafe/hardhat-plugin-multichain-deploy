@@ -4638,17 +4638,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"demo@workspace:packages/demo":
-  version: 0.0.0-use.local
-  resolution: "demo@workspace:packages/demo"
-  dependencies:
-    "@types/eslint": ^8.37.0
-    "@types/node": 18.15.11
-    eslint: ^8.37.0
-    typescript: ^5.0.3
-  languageName: unknown
-  linkType: soft
-
 "depd@npm:2.0.0":
   version: 2.0.0
   resolution: "depd@npm:2.0.0"
@@ -5169,7 +5158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8, eslint@npm:^8.37.0":
+"eslint@npm:^8":
   version: 8.56.0
   resolution: "eslint@npm:8.56.0"
   dependencies:
