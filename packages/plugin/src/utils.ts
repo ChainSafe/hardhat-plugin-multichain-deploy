@@ -152,42 +152,36 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   };
 }
 
-export async function transferStatusInterval(
+export async function pollTransferStatusUntilResolved(
   environment: Environment,
   txHash: string,
-  domainID: bigint
+  domainIDs: bigint[]
 ): Promise<string> {
-  let explorerUrl: string = "";
-  let handled = false;
+  const resolved: bigint[] = [];
 
-  await new Promise((resolve) => {
-    let controller: AbortController;
+  return await new Promise((resolve) => {
     setInterval(() => {
-      controller = new AbortController();
-      void getTransferStatusData(environment, txHash, domainID.toString())
-        .then((transferStatus) => {
-          handled = true; //
-
-          explorerUrl = transferStatus.explorerUrl;
-
-          if (transferStatus.status === "executed") {
-            controller.abort();
-            resolve(explorerUrl);
+      void getTransferStatusData(environment, txHash).then((transferStatus) => {
+        transferStatus.forEach(({ status, toDomainId, explorerUrl }) => {
+          if (!domainIDs.find((id) => id === BigInt(toDomainId))) {
+            if (!domainIDs.includes(BigInt(toDomainId)))
+              resolved.push(BigInt(toDomainId));
+            return;
           }
-          if (transferStatus.status === "failed") {
+
+          if (status === "executed") {
+            if (!domainIDs.includes(BigInt(toDomainId)))
+              resolved.push(BigInt(toDomainId));
+            if (resolved.length === domainIDs.length) resolve(explorerUrl);
+          }
+          if (status === "failed") {
             throw new HardhatPluginError(
               "@chainsafe/hardhat-plugin-multichain-deploy",
               `Bridge transfer failed`
             );
           }
-        })
-        .catch((error: Error) => {
-          if (!error.message.includes("Transfer with txHash") && !handled)
-            return;
-          return error;
         });
+      });
     }, 1000);
   });
-
-  return explorerUrl;
 }

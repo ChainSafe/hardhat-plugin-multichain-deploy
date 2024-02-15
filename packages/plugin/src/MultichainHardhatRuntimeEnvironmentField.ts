@@ -6,8 +6,8 @@ import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
   sumedFees,
-  transferStatusInterval,
   mapNetworkArgs,
+  pollTransferStatusUntilResolved,
 } from "./utils";
 import {
   AdapterABI,
@@ -310,15 +310,10 @@ export class MultichainHardhatRuntimeEnvironmentField {
     transactionHash: string,
     domainIDs: bigint[]
   ): Promise<void> {
-    let explorerUrl = "";
-    await Promise.all(
-      domainIDs.map(async (domainId): Promise<void> => {
-        explorerUrl = await transferStatusInterval(
-          this.hre.config.multichain.environment,
-          transactionHash,
-          domainId
-        );
-      })
+    const explorerUrl = await pollTransferStatusUntilResolved(
+      this.hre.config.multichain.environment,
+      transactionHash,
+      domainIDs
     );
 
     console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
