@@ -86,6 +86,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@buildwithsygma/sygma-sdk-core@npm:^2.7.1":
+  version: 2.7.1
+  resolution: "@buildwithsygma/sygma-sdk-core@npm:2.7.1"
+  dependencies:
+    "@buildwithsygma/sygma-contracts": 2.5.1
+    "@ethersproject/abi": ^5.7.0
+    "@ethersproject/bytes": ^5.7.0
+    "@ethersproject/contracts": ^5.7.0
+    "@ethersproject/providers": ^5.7.2
+    "@polkadot/api": 10.7.2
+    "@polkadot/api-augment": 10.7.2
+    "@polkadot/extension-inject": 0.46.3
+    "@polkadot/keyring": 12.2.1
+    "@polkadot/rpc-provider": 10.7.2
+    "@polkadot/ui-keyring": 3.4.1
+    "@polkadot/util": 12.2.1
+    "@polkadot/util-crypto": 12.2.1
+    ethers: 5.6.2
+  checksum: 331b59bcc6c03043dc2354e001d85f42f047e8ade8769787d0f2f5b98f71bed6fc5d69c0c43ba28cc927a85241149203e7f1f595f5a8509c0e7858049439a543
+  languageName: node
+  linkType: hard
+
 "@chainsafe/as-sha256@npm:^0.3.1":
   version: 0.3.1
   resolution: "@chainsafe/as-sha256@npm:0.3.1"
@@ -134,7 +156,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@chainsafe/hardhat-plugin-multichain-deploy@workspace:packages/plugin"
   dependencies:
-    "@buildwithsygma/sygma-sdk-core": ^2.7
+    "@buildwithsygma/sygma-sdk-core": ^2.7.1
     "@chainsafe/hardhat-plugin-multichain-deploy-contracts": "workspace:^"
     "@types/chai": ^4.1.7
     "@types/chai-as-promised": ^7
@@ -153,7 +175,7 @@ __metadata:
     typescript: ^5
     web3: ^4.3.0
   peerDependencies:
-    "@buildwithsygma/sygma-sdk-core": ">= 2.7.0"
+    "@buildwithsygma/sygma-sdk-core": ">= 2.7.1"
     hardhat: ^2.0.0
   languageName: unknown
   linkType: soft
