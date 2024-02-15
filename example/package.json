@@ -2,7 +2,6 @@
   "name": "multichain-deploy-example",
   "private": true,
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "lint": "eslint --color --ext .ts scripts/",
     "lint:fix": "yarn run lint --fix",
