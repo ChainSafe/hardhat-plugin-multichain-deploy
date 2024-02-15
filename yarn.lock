@@ -7711,9 +7711,11 @@ __metadata:
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.2.0
+    "@types/eslint": ^8
     "@types/mocha": ">=9.1.0"
     "@types/node": ">=16.0.0"
     chai: 4
+    eslint: ^8
     ethers: ^6.11.0
     hardhat: ^2.19.5
     hardhat-gas-reporter: ^1.0.10

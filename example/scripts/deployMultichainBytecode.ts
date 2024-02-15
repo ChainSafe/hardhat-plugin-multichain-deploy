@@ -1,23 +1,31 @@
 import { multichain } from "hardhat";
-import { NetworkArguments} from "@chainsafe/hardhat-plugin-multichain-deploy";
+import { NetworkArguments } from "@chainsafe/hardhat-plugin-multichain-deploy";
 import artifact from "../artifacts/contracts/Lock.sol/Lock";
 
-async function main() {
+async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
   const unlockTime = BigInt(currentTimestampInSeconds + 60);
 
-  const networkArguments = ['sepolia', 'mumbai', 'holesky'].reduce((args, networkName) => {
-    args[networkName] = {
-      args: [unlockTime],
-      initData: {
-        initMethodName: "setName",
-        initMethodArgs: [networkName]
-      }
+  const networkArguments = ["sepolia", "mumbai", "holesky"].reduce(
+    (args, networkName) => {
+      args[networkName] = {
+        args: [unlockTime],
+        initData: {
+          initMethodName: "setName",
+          initMethodArgs: [networkName],
+        },
       };
-    return args;
-  }, {} as NetworkArguments);
+      return args;
+    },
+    {} as NetworkArguments
+  );
 
-  const { transactionHash, domainIDs } = await multichain.deployMultichainBytecode(artifact.bytecode, artifact.abi, networkArguments);
+  const { transactionHash, domainIDs } =
+    await multichain.deployMultichainBytecode(
+      artifact.bytecode,
+      artifact.abi,
+      networkArguments
+    );
 
   await multichain.getDeploymentInfo(transactionHash, domainIDs);
 }
