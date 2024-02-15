@@ -5365,12 +5365,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereumjs-abi@npm:^0.6.8":
+"ethereumjs-abi@https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz":
   version: 0.6.8
-  resolution: "ethereumjs-abi@npm:0.6.8"
+  resolution: "ethereumjs-abi@https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz"
   dependencies:
-    bn.js: "npm:^4.11.8"
-    ethereumjs-util: "npm:^6.0.0"
+    bn.js: ^4.11.8
+    ethereumjs-util: ^6.0.0
   checksum: a7ff1917625e3c812cb3bca6c1231fc0ece282cc7d202d60545a9c31cd379fd751bfed5ff78dae4279cb1ba4d0e8967f9fdd4f135a334a38dbf04e7afd0c4bcf
   languageName: node
   linkType: hard
