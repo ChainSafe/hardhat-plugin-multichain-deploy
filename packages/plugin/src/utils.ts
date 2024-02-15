@@ -160,19 +160,29 @@ export async function pollTransferStatusUntilResolved(
   const resolved: bigint[] = [];
 
   return await new Promise((resolve) => {
-    setInterval(() => {
+    const interval = setInterval(() => {
       void getTransferStatusData(environment, txHash).then((transferStatus) => {
-        transferStatus.forEach(({ status, toDomainId, explorerUrl }) => {
-          if (!domainIDs.find((id) => id === BigInt(toDomainId))) {
-            if (!domainIDs.includes(BigInt(toDomainId)))
-              resolved.push(BigInt(toDomainId));
-            return;
-          }
+        if (!transferStatus.length) return;
 
-          if (status === "executed") {
-            if (!domainIDs.includes(BigInt(toDomainId)))
+        const responseIds = transferStatus.map((item) => item.toDomainId);
+        const missingNumbers = domainIDs.filter(
+          (domain) => !responseIds.includes(Number(domain))
+        );
+        if (missingNumbers.length) {
+          missingNumbers.forEach((toDomainId) => {
+            if (!resolved.includes(BigInt(toDomainId)))
               resolved.push(BigInt(toDomainId));
-            if (resolved.length === domainIDs.length) resolve(explorerUrl);
+          });
+        }
+
+        transferStatus.forEach(({ status, toDomainId, explorerUrl }) => {
+          if (status === "executed") {
+            if (!resolved.includes(BigInt(toDomainId)))
+              resolved.push(BigInt(toDomainId));
+            if (resolved.length === domainIDs.length) {
+              clearInterval(interval);
+              resolve(explorerUrl);
+            }
           }
           if (status === "failed") {
             throw new HardhatPluginError(
