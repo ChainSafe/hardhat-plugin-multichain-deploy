@@ -2698,7 +2698,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:*, @types/chai@npm:^4.1.7, @types/chai@npm:^4.2.0":
+"@types/chai@npm:*, @types/chai@npm:^4, @types/chai@npm:^4.1.7, @types/chai@npm:^4.2.0":
   version: 4.3.11
   resolution: "@types/chai@npm:4.3.11"
   checksum: 0c216ac4a19bfbf8318bb104d32e50704ee2ffc4b538b976c4326e6638fee121462402caa570662227a2a218810388aadb14bdbd3d3d474ec300b00695db448a
@@ -8756,8 +8756,10 @@ __metadata:
   dependencies:
     "@chainsafe/eslint-config": ^1.1.0
     "@rushstack/eslint-patch": ^1.2.0
+    "@types/chai": ^4
     "@types/eslint": ^8.37.0
     "@types/node": 18.15.11
+    chai: ^4.2.0
     eslint: 8.37.0
     typescript: ^5.0.3
   languageName: unknown
