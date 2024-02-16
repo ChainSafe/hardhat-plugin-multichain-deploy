@@ -1,25 +1,36 @@
-import { multichain } from "hardhat";
+import { multichain, web3 } from "hardhat";
 import { NetworkArguments } from "@chainsafe/hardhat-plugin-multichain-deploy";
 
 async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
   const unlockTime = BigInt(currentTimestampInSeconds + 60);
+  const [deployer] = await web3.eth.getAccounts();
 
   const { adapterAddress } = await multichain.initLocalEnvironment();
 
-  const networkArguments = ["sepolia", "mumbai", "holesky"].reduce(
-    (args, networkName) => {
-      args[networkName] = {
-        args: [unlockTime],
-        initData: {
-          initMethodName: "setName",
-          initMethodArgs: [networkName],
-        },
-      };
-      return args;
+  const networkArguments: NetworkArguments = {
+    sepolia: {
+      args: [deployer, unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["sepolia"],
+      },
     },
-    {} as NetworkArguments
-  );
+    mumbai: {
+      args: [deployer, unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["mumbai"],
+      },
+    },
+    holesky: {
+      args: [deployer, unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["holesky"],
+      },
+    },
+  };
 
   await multichain.deployMultichain("Lock", networkArguments, {
     adapterAddress,

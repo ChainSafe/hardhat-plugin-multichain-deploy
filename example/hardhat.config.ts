@@ -1,6 +1,7 @@
 import {HardhatUserConfig, vars} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@chainsafe/hardhat-ts-artifact-plugin";
+import "@nomicfoundation/hardhat-web3-v4";
 
 import "@chainsafe/hardhat-plugin-multichain-deploy";
 import {Environment} from "@buildwithsygma/sygma-sdk-core";
