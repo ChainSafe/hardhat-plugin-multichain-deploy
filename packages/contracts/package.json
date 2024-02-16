@@ -1,6 +1,6 @@
 {
   "name": "@chainsafe/hardhat-plugin-multichain-deploy-contracts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "repository": {
     "type": "git",
