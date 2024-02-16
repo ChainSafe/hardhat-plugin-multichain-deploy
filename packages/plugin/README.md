@@ -1,5 +1,4 @@
 # ChainSafe's Hardhat Plugin for Multichain Deployment with Sygma
-
 Unlock the full potential of Hardhat with Sygma: the premier plugin for effortlessly deploying your Ethereum smart contracts across multiple blockchain networks. Leveraging the Sygma protocol, this tool revolutionizes your deployment process, making it efficient, streamlined, and truly multi-chain. With ChainSafe's plugin, you're not just deploying contracts—you're exploring new possibilities within the blockchain ecosystem.
 
 ## Installation
