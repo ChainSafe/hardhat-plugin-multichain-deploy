@@ -1,9 +1,9 @@
 import {HardhatUserConfig, vars} from "hardhat/config";
-import {Environment} from "@buildwithsygma/sygma-sdk-core";
-
 import "@nomicfoundation/hardhat-toolbox";
 import "@chainsafe/hardhat-ts-artifact-plugin";
+
 import "@chainsafe/hardhat-plugin-multichain-deploy";
+import {Environment} from "@buildwithsygma/sygma-sdk-core";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
