@@ -1,6 +1,6 @@
 {
   "name": "@chainsafe/hardhat-plugin-multichain-deploy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TODO",
   "repository": "github:ChainSafe/hardhat-plugin-multichain-deploy",
   "author": "ChainSafe Systems",
