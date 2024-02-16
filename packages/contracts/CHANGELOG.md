@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/compare/hardhat-plugin-multichain-deploy-contracts-v1.0.0...hardhat-plugin-multichain-deploy-contracts-v1.0.1) (2024-02-16)
+
+
+### Bug Fixes
+
+* release ([#51](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/issues/51)) ([7ec4e98](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/commit/7ec4e984901f8f026a4a39bfe398cbcf07df8f5d))
+
 ## 1.0.0 (2024-02-16)
 
 
