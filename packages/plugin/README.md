@@ -20,7 +20,7 @@ require("@chainsafe/hardhat-plugin-multichain-deploy");
 
 For TypeScript users, include it in your `hardhat.config.ts`:
 
-```js
+```ts
 import "@chainsafe/hardhat-plugin-multichain-deploy";
 ```
 

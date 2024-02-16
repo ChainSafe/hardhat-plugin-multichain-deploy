@@ -1,13 +1,13 @@
 import { extendConfig, extendEnvironment } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
-import {
-  HardhatConfig,
-  HardhatUserConfig,
-  MultichainConfig,
-} from "hardhat/types";
+import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
 import { Environment } from "@buildwithsygma/sygma-sdk-core";
 import { MultichainHardhatRuntimeEnvironmentField } from "./MultichainHardhatRuntimeEnvironmentField";
+import { MultichainConfig } from "./types";
+
 import "./type-extensions";
+
+export * from "./types";
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {

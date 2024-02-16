@@ -3,21 +3,24 @@
   "private": true,
   "author": "ChainSafe <info@chainsafe.io>",
   "license": "(MIT)",
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.8.0",
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "example"
     ]
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "yarn workspaces foreach -vpt run build",
+    "build": "yarn build:pakages && yarn build:example",
     "lint": "yarn workspaces foreach -vpt run lint",
     "test": "yarn workspaces foreach -vpt run test",
     "test:unit": "yarn workspaces foreach -vpt run test:unit",
-    "test:integrations": "yarn workspaces foreach -vpt run test:integrations"
+    "test:integrations": "yarn workspaces foreach -vpt run test:integrations",
+    "build:pakages": "yarn workspaces foreach -vpt --no-private run build",
+    "build:example": "yarn workspace multichain-deploy-example run build"
   },
   "devDependencies": {
     "@chainsafe/eslint-config": "^1.1.0",

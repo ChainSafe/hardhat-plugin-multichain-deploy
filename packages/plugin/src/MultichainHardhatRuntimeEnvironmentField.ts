@@ -6,8 +6,8 @@ import {
   getConfigEnvironmentVariable,
   getNetworkChainId,
   sumedFees,
-  transferStatusInterval,
   mapNetworkArgs,
+  pollTransferStatusUntilResolved,
 } from "./utils";
 import {
   AdapterABI,
@@ -251,15 +251,15 @@ export class MultichainHardhatRuntimeEnvironmentField {
       .send({
         from: deployer,
         value: sumedFees(fees),
-        ...(options!.customNonPayableTxOptions || {}),
+        ...(options?.customNonPayableTxOptions || {}),
       });
     const networkNames = Object.keys(networkArgs);
     const { transactionHash } = receipt;
     console.log(
       `Multichain deployment initiated, transaction hash: ${transactionHash}` +
         "\n" +
-        "Destinaton networks:" +
-        networkNames.join("\r\n")
+        "Destinaton networks:\r\n" +
+        networkNames.map((name) => ` - ${name}`).join("\r\n")
     );
 
     const destinationDomainChainIDs = deployDomainIDs.map((deployDomainID) => {
@@ -310,16 +310,12 @@ export class MultichainHardhatRuntimeEnvironmentField {
     transactionHash: string,
     domainIDs: bigint[]
   ): Promise<void> {
-    await Promise.all(
-      domainIDs.map(async (domainId): Promise<void> => {
-        const explorerUrl = await transferStatusInterval(
-          this.hre.config.multichain.environment,
-          transactionHash,
-          domainId
-        );
-
-        console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
-      })
+    const explorerUrl = await pollTransferStatusUntilResolved(
+      this.hre.config.multichain.environment,
+      transactionHash,
+      domainIDs
     );
+
+    console.log(`Bridge transfer executed. More details: ${explorerUrl}`);
   }
 }

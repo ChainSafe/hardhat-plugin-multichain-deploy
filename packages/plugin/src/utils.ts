@@ -114,6 +114,7 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
 
       const argsInBytes = eth.abi.encodeParameters(
         constructorAbi,
+        // @ts-ignore
         networkConstructorArgs
       );
       //provided constructorAbi with args
@@ -151,35 +152,46 @@ export function mapNetworkArgs<Abi extends ContractAbi = any>(
   };
 }
 
-export async function transferStatusInterval(
+export async function pollTransferStatusUntilResolved(
   environment: Environment,
   txHash: string,
-  domainID: bigint
+  domainIDs: bigint[]
 ): Promise<string> {
-  let explorerUrl: string = "";
+  const resolved: bigint[] = [];
 
-  await new Promise((resolve) => {
-    let controller: AbortController;
-    setInterval(() => {
-      controller = new AbortController();
-      void getTransferStatusData(environment, txHash, domainID.toString()).then(
-        (transferStatus) => {
-          explorerUrl = transferStatus.explorerUrl;
+  return await new Promise((resolve) => {
+    const interval = setInterval(() => {
+      void getTransferStatusData(environment, txHash).then((transferStatus) => {
+        if (!transferStatus.length) return;
 
-          if (transferStatus.status === "executed") {
-            controller.abort();
-            resolve(explorerUrl);
+        const responseIds = transferStatus.map((item) => item.toDomainId);
+        const missingNumbers = domainIDs.filter(
+          (domain) => !responseIds.includes(Number(domain))
+        );
+        if (missingNumbers.length) {
+          missingNumbers.forEach((toDomainId) => {
+            if (!resolved.includes(BigInt(toDomainId)))
+              resolved.push(BigInt(toDomainId));
+          });
+        }
+
+        transferStatus.forEach(({ status, toDomainId, explorerUrl }) => {
+          if (status === "executed") {
+            if (!resolved.includes(BigInt(toDomainId)))
+              resolved.push(BigInt(toDomainId));
+            if (resolved.length === domainIDs.length) {
+              clearInterval(interval);
+              resolve(explorerUrl);
+            }
           }
-          if (transferStatus.status === "failed") {
+          if (status === "failed") {
             throw new HardhatPluginError(
               "@chainsafe/hardhat-plugin-multichain-deploy",
               `Bridge transfer failed`
             );
           }
-        }
-      );
+        });
+      });
     }, 1000);
   });
-
-  return explorerUrl;
 }

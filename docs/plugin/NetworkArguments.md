@@ -21,7 +21,7 @@ interface NetworkArgument<Abi extends ContractAbi = any> {
 ## Usages
 
 ### NetworkArguments
-  - **Description**: An object where each key is a network name registered on Sygma, mapped to their respective `NetworkArgument`. This structure facilitates network-specific deployment configurations, allowing for deployment across networks recognized by the Sygma protocol.
+  - **Description**: An object where each key is a network name registered on Sygma, mapped to their respective `NetworkArgument`. This structure facilitates network-specific deployment configurations, allowing for deployment across networks recognized by the Sygma protocol. For a comprehensive list of supported networks, refer to the [Sygma Documentation](https://docs.buildwithsygma.com/environments)
   - **Purpose**: Enables the deployment of contracts to specified networks, leveraging the configurations tailored for each network as recognized by Sygma.
 
 ### NetworkArgument
