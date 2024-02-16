@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/compare/hardhat-plugin-multichain-deploy-v1.0.2...hardhat-plugin-multichain-deploy-v1.0.3) (2024-02-16)
+
+
+### Bug Fixes
+
+* npm files ([#56](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/issues/56)) ([e5448ab](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/commit/e5448abd200f41ac75ff2ddadf9298959d163532))
+
 ## [1.0.2](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/compare/hardhat-plugin-multichain-deploy-v1.0.1...hardhat-plugin-multichain-deploy-v1.0.2) (2024-02-16)
 
 
