@@ -129,8 +129,7 @@ describe("CrosschainDeployAdapter", function () {
         expect(params.length).to.equal(0, "Cannot assert params");
         return;
       }
-      expect(err.innerError.errorName).to.equal(expectedErrorName);
-      expect(mixToArray(err.innerError.errorArgs)).to.eql(params);
+      expect(err.innerError.message).to.include(`${expectedErrorName}(${params.join(', ')})`);
       return;
     }
     throw new Error("Transaction did not revert");
