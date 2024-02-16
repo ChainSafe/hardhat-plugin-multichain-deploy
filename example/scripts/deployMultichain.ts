@@ -5,19 +5,29 @@ async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
   const unlockTime = BigInt(currentTimestampInSeconds + 60);
 
-  const networkArguments = ["sepolia", "mumbai", "holesky"].reduce(
-    (args, networkName) => {
-      args[networkName] = {
-        args: [unlockTime],
-        initData: {
-          initMethodName: "setName",
-          initMethodArgs: [networkName],
-        },
-      };
-      return args;
+  const networkArguments: NetworkArguments = {
+    sepolia: {
+      args: [unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["sepolia"],
+      },
     },
-    {} as NetworkArguments
-  );
+    mumbai: {
+      args: [unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["mumbai"],
+      },
+    },
+    holesky: {
+      args: [unlockTime],
+      initData: {
+        initMethodName: "setName",
+        initMethodArgs: ["holesky"],
+      },
+    },
+  };
 
   const { transactionHash, domainIDs } = await multichain.deployMultichain(
     "Lock",

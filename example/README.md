@@ -10,8 +10,6 @@ Before diving into the deployment process, you must first set up your environmen
 npx hardhat var set PK
 ```
 
-This command securely stores your private key, enabling Hardhat to interact with blockchain networks on your behalf.
-
 ## Deployment Options
 
 This example offers three distinct deployment scripts, each catering to different deployment scenarios. Depending on your requirements, you can choose the script that best fits your needs.
