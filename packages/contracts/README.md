@@ -1,5 +1,4 @@
 # hardhat-plugin-multichain-deploy/contracts
-
 CrosschainDeployAdapter contract is meant to be used in conjunction with CreateX and Sygma projects to allow for seamless same address cross chain contracts deployment. Bytecode and constructor params of the deployed contract does not affect the resulting address, which makes it even more convenient.
 
 Expected user flow is to call `Adapter.calculateDeployFee()` to get a list of fee amounts needed for each target domain deployment. Then user should send transaction `Adapter.deploy(..., fees, {value: feesSum})` that will in turn call PermissionlessGenericHandler of Sygma, that will trigger deployments of the specified bytecode across desired domain ids (chains).
