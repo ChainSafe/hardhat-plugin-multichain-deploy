@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import {HardhatUserConfig, vars} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@chainsafe/hardhat-ts-artifact-plugin";
@@ -22,7 +23,12 @@ const config: HardhatUserConfig = {
   },
   multichain: {
     environment: Environment.TESTNET,
-  }
+  },
+  etherscan: {
+    apiKey: { 
+      sepolia: process.env.API_KEY,
+    }
+  },
 };
 
 export default config;

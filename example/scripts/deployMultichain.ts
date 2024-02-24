@@ -4,6 +4,9 @@ import { NetworkArguments } from "@chainsafe/hardhat-plugin-multichain-deploy";
 async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
   const unlockTime = BigInt(currentTimestampInSeconds + 60);
+  // Log the unlockTime for reference
+  console.log("Deploying with unlockTime (UNIX timestamp):", unlockTime.toString());
+
   const [deployer] = await web3.eth.getAccounts();
 
   const networkArguments: NetworkArguments = {
@@ -34,6 +37,10 @@ async function main(): Promise<void> {
     "Lock",
     networkArguments
   );
+
+  // Optionally, log the transactionHash and domainIDs for reference
+  console.log("Deployment transaction hash:", transactionHash);
+  console.log("Deployed domain IDs:", domainIDs);
 
   await multichain.getDeploymentInfo(transactionHash, domainIDs);
 }
