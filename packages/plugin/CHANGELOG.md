@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/compare/hardhat-plugin-multichain-deploy-v1.0.3...hardhat-plugin-multichain-deploy-v1.0.4) (2024-03-04)
+
+
+### Bug Fixes
+
+* `adapter` address ([#58](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/issues/58)) ([1a99d42](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/commit/1a99d423aaf819214973f401cbe17ab88db8a03c))
+
 ## [1.0.3](https://github.com/ChainSafe/hardhat-plugin-multichain-deploy/compare/hardhat-plugin-multichain-deploy-v1.0.2...hardhat-plugin-multichain-deploy-v1.0.3) (2024-02-16)
 
 

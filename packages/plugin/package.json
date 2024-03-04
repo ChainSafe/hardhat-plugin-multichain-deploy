@@ -1,6 +1,6 @@
 {
   "name": "@chainsafe/hardhat-plugin-multichain-deploy",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A Hardhat plugin for efficient multichain deployment of Ethereum smart contracts via the Sygma protocol, offering streamlined processes and flexible configurations for blockchain developers.",
   "author": "ChainSafe Systems",
   "license": "Apache-2.0",
