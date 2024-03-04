@@ -38,7 +38,7 @@ export class MultichainHardhatRuntimeEnvironmentField {
 
   private ADAPTER_ADDRESS = vars.get(
     "ADAPTER_ADDRESS",
-    "0x85d62ad850b322152bf4ad9147bfbf097da42217"
+    "0xD72f1165751c3B9C5952B19596A36354ac30FdBd"
   );
 
   //current Sygma hardcoded gasLimit
