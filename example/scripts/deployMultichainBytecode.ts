@@ -4,7 +4,7 @@ import artifact from "../artifacts/contracts/Lock.sol/Lock";
 
 async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = BigInt(currentTimestampInSeconds + 60);
+  const unlockTime = BigInt(currentTimestampInSeconds + 1200);
   const [deployer] = await web3.eth.getAccounts();
 
   const networkArguments: NetworkArguments = {
