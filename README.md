@@ -2,17 +2,26 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
-3. [Getting Started](#getting-started)
-4. [Building](#building)
-5. [Testing](#testing)
-6. [Linting and Formatting](#linting-and-formatting)
+- [Chainsafe's Hardhat Plugin for Multichain deployment with Sygma](#chainsafes-hardhat-plugin-for-multichain-deployment-with-sygma)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Prerequisites](#prerequisites)
+  - [Getting Started](#getting-started)
+  - [Building](#building)
+  - [Testing](#testing)
+  - [Linting and Formatting](#linting-and-formatting)
 
 <a name="introduction"></a>
 ## Introduction
 
 Unleash the potential of multi-chain deployment with Hardhat and Sygma: the essential plugin for deploying Ethereum smart contracts with ease and efficiency. Elevate your blockchain development with this powerful, streamlined solution.
+
+This version should be considered Beta, with mainnet support coming soon. 
+
+Currently supported testnets include:
+- Sepolia
+- Holesky
+- Mumbai
 
 <a name="prerequisites"></a>
 ## Prerequisites
