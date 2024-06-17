@@ -16,13 +16,6 @@ async function main(): Promise<void> {
         initMethodArgs: ["sepolia"],
       },
     },
-    mumbai: {
-      args: [deployer, unlockTime],
-      initData: {
-        initMethodName: "setName",
-        initMethodArgs: ["mumbai"],
-      },
-    },
     holesky: {
       args: [deployer, unlockTime],
       initData: {
@@ -32,7 +25,7 @@ async function main(): Promise<void> {
     },
   };
 
-  await multichain.deployMultichain("Lock", networkArguments, {
+  await multichain.deployMultichain("Storage", networkArguments, {
     adapterAddress,
   });
 }

@@ -1,6 +1,6 @@
 import { multichain, web3 } from "hardhat";
 import { NetworkArguments } from "@chainsafe/hardhat-plugin-multichain-deploy";
-import artifact from "../artifacts/contracts/Lock.sol/Lock";
+import artifact from "../artifacts/contracts/Storage.sol/Storage";
 
 async function main(): Promise<void> {
   const currentTimestampInSeconds = Math.round(Date.now() / 1000);
@@ -13,13 +13,6 @@ async function main(): Promise<void> {
       initData: {
         initMethodName: "setName",
         initMethodArgs: ["sepolia"],
-      },
-    },
-    mumbai: {
-      args: [deployer, unlockTime],
-      initData: {
-        initMethodName: "setName",
-        initMethodArgs: ["mumbai"],
       },
     },
     holesky: {

@@ -14,9 +14,9 @@ const config: HardhatUserConfig = {
       url: "https://ethereum-sepolia.publicnode.com",
       accounts: vars.has("PK") ? [vars.get("PK")] : [],
     },
-    mumbai: {
-      chainId: 80001,
-      url: "https://gateway.tenderly.co/public/polygon-mumbai",
+    holesky: {
+      chainId: 17000,
+      url: "https://ethereum-holesky-rpc.publicnode.com",
       accounts: vars.has("PK") ? [vars.get("PK")] : [],
     },
   },
